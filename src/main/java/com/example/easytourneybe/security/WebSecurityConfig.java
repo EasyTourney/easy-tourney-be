@@ -1,6 +1,7 @@
 package com.example.easytourneybe.security;
 
 
+import com.example.easytourneybe.enums.UserRole;
 import com.example.easytourneybe.security.jwt.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +24,8 @@ public class WebSecurityConfig {
     private JwtFilter jwtFilter;
     @Autowired
     private final AuthenticationProvider authenticationProvider;
-    private static final String[] WHITE_LIST_URL = {"/auth/**"
-    };
+    private static final String[] WHITE_LIST_URL = {"/auth/**"};
+    private static final String[] ONLY_ADMIN_LIST_URL = {"/category/**", "/organizer/**"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -34,6 +35,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(request ->
                         request
                                 .requestMatchers(WHITE_LIST_URL).permitAll()
+                                .requestMatchers(ONLY_ADMIN_LIST_URL).hasAuthority(UserRole.ADMIN.name())
                                 .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider);
