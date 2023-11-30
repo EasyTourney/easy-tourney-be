@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CategoryController {
     private final ICategoryService ICategoryService;
 
-    public CategoryController(ICategoryService ICategoryService){
+    public CategoryController(ICategoryService ICategoryService) {
         this.ICategoryService = ICategoryService;
     }
 
