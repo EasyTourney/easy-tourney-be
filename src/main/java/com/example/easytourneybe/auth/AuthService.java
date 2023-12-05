@@ -1,5 +1,6 @@
 package com.example.easytourneybe.auth;
 
+import com.example.easytourneybe.exceptions.AuthenticationException;
 import com.example.easytourneybe.security.jwt.JwtService;
 import com.example.easytourneybe.user.User;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ public class AuthService {
     @Autowired
     private final AuthenticationManager authenticationManager;
 
-    public AuthResponse authenticate(AuthRequest request) throws Exception {
+    public AuthResponse authenticate(AuthRequest request) {
         Authentication authentication;
 
         try {
@@ -27,7 +28,7 @@ public class AuthService {
                     )
             );
         } catch (Exception ex) {
-            throw new Exception("Invalid username or password");
+            throw new AuthenticationException("Invalid username or password");
         }
 
         User user = (User) authentication.getPrincipal();
