@@ -1,38 +1,43 @@
 package com.example.easytourneybe.category;
 
+import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.*;
-
 import java.time.LocalDateTime;
 
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name = "category")
 public class Category {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "category_id")
+    @Column(name = "categoryId")
     private Long categoryId;
 
     @NotNull(message = "Category name is required")
+    @NotBlank(message = "Category name must be between 1 and 30 characters")
     @Size(min = 1, max = 30, message = "Category name must be between 1 and 30 characters")
-    @Column(name = "category_name", nullable = false, length = 30)
+    @Column(name = "categoryName", nullable = false, unique = false, length = 30)
     private String categoryName;
 
-    @Column(name = "is_deleted")
+    @Column(name = "isDeleted")
     private boolean isDeleted;
 
-    @Column(name = "created_at")
+    @Column(name = "createdAt")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updatedAt")
     private LocalDateTime updatedAt;
 
-    @Column(name = "deleted_at")
+    @Column(name = "deletedAt")
     private LocalDateTime deletedAt;
-
 }
