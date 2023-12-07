@@ -5,9 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
@@ -17,16 +16,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name = "category")
 public class Category {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "categoryId")
     private Long categoryId;
 
-    @NotNull(message = "Category name is required")
-    @NotBlank(message = "Category name must be between 1 and 30 characters")
-    @Size(min = 1, max = 30, message = "Category name must be between 1 and 30 characters")
-    @Column(name = "categoryName", nullable = false, unique = false, length = 30)
+    @Pattern(regexp = "^[a-zA-Z0-9\\s]*$", message = "Category name must be alphanumeric")
+    @NotBlank(message = "Category name must be between 2 and 30 characters")
+    @Size(min = 2, max = 30, message = "Category name must be between 2 and 30 characters")
+    @Column(name = "categoryName", nullable = false)
     private String categoryName;
 
     @Column(name = "isDeleted")
@@ -40,4 +38,8 @@ public class Category {
 
     @Column(name = "deletedAt")
     private LocalDateTime deletedAt;
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = (categoryName != null) ? categoryName.trim() : null;
+    }
 }
