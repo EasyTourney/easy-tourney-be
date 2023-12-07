@@ -29,9 +29,9 @@ public class WebSecurityConfig {
     @Autowired
     private final AuthenticationProvider authenticationProvider;
     private static final String[] WHITE_LIST_URL = {"/auth/**"};
+    private static final String[] SWAGGER_LIST_URL = {"/swagger-ui/**", "/*/swagger-resources/**", "/v2/api-docs","/webjars/**",  "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**"};
     private static final String[] ONLY_ADMIN_LIST_URL = {"/category/**", "/organizer/**"};
 
-    private static final String[] SWAGGER_LIST_URL = {"/swagger-ui/**", "/*/swagger-resources/**", "/v2/api-docs","/webjars/**",  "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**"};
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
