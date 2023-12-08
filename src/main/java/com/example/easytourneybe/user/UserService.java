@@ -52,7 +52,7 @@ public class UserService implements UserDetailsService {
         return userRepository.totalOrganizer(keyword);
     }
     public Optional<User> deleteOrganizer(Integer id) {
-        Optional<User> foundUser = userRepository.findById(id);
+        Optional<User> foundUser = userRepository.findOrganizerById(id);
 
         if (foundUser.isPresent()) {
             User category = foundUser.get();

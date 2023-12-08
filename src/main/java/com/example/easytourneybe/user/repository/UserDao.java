@@ -27,7 +27,7 @@ public class UserDao {
                 "   COUNT(ot.tournament_id) AS totalTournament " +
                 "FROM " +
                 "    users u " +
-                "JOIN " +
+                "LEFT JOIN " +
                 "    organizer_tournament ot ON u.id = ot.user_id " +
                 "WHERE " +
                 "    u.role = 'ORGANIZER' AND u.is_deleted = false " +
