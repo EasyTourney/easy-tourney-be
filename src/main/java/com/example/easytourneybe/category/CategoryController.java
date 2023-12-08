@@ -29,12 +29,12 @@ public class CategoryController {
 
         if (foundCategory.isPresent()) {
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject(true, 1, foundCategory, "success")
+                    new ResponseObject(true, 1, foundCategory)
             );
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                new ResponseObject(false, 0, "", "category not found")
+                new ResponseObject(false, 0, "")
         );
     }
     @GetMapping("")
@@ -50,8 +50,7 @@ public class CategoryController {
         ResponseObject responseObject = new ResponseObject(
                     true,
                     foundCategories.size(),
-                    foundCategories,
-                    "success"
+                    foundCategories
             );
         responseObject.setAdditionalData(java.util.Collections.singletonMap("totalCategories", totalCategories));
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
@@ -61,13 +60,13 @@ public class CategoryController {
     public ResponseEntity<ResponseObject> deleteCategory(@PathVariable Long id) {
         Optional<Category> updatedCategory = CategoryService.updateCategoryIsDelete(id);
         return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject(true, 1, updatedCategory, "delete successfully"));
+                    new ResponseObject(true, 1, updatedCategory));
     }
     @PutMapping("/{id}")
     public ResponseEntity<ResponseObject> updateCategory(@PathVariable Long id, @Valid @RequestBody Category category) {
         Optional<Category> updatedCategory = CategoryService.updateCategory(id, category.getCategoryName().trim());
         return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject(true, 1, updatedCategory, "Update successfully")
+                    new ResponseObject(true, 1, updatedCategory)
             );
     }
 
@@ -76,7 +75,7 @@ public class CategoryController {
     public ResponseEntity<ResponseObject> createCategory(@Valid @RequestBody Category category) {
         Category temp = CategoryService.createCategory(category.getCategoryName().trim());
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                new ResponseObject(true, 1, temp, "Create category successfully")
+                new ResponseObject(true, 1, temp)
         );
     }
 }

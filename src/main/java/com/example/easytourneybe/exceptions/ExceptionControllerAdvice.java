@@ -40,39 +40,66 @@ public class ExceptionControllerAdvice {
                 .findFirst()
                 .map(ConstraintViolation::getMessage)
                 .orElse("Validation failed");
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                new ResponseObject(false, 0, "", errorMessage)
+        ResponseObject responseObject = new ResponseObject(
+                false,
+                0,
+                ""
         );
+        responseObject.setErrorMessage(java.util.Collections.singletonMap("ConstraintViolation Error", errorMessage));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseObject);
     }
 
     @ExceptionHandler(InvalidRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public static ResponseEntity<ResponseObject> handleInvalidPageAndSizeException(InvalidRequestException e) {
+        ResponseObject responseObject = new ResponseObject(
+                false,
+                0,
+                ""
+        );
+        responseObject.setErrorMessage(java.util.Collections.singletonMap("InvalidPageAndSize Error", e.getMessage()));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                new ResponseObject(false, 0, "", e.getMessage())
+                responseObject
         );
     }
 
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public static ResponseEntity<ResponseObject> handleNotFoundException(NoSuchElementException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                new ResponseObject(false, 0, "", e.getMessage())
+        ResponseObject responseObject = new ResponseObject(
+                false,
+                0,
+                ""
+        );
+        responseObject.setErrorMessage(java.util.Collections.singletonMap("NotFound Error", e.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                responseObject
         );
     }
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public static ResponseEntity<ResponseObject> handleNullPointerException(NullPointerException e) {
+        ResponseObject responseObject = new ResponseObject(
+                false,
+                0,
+                ""
+        );
+        responseObject.setErrorMessage(java.util.Collections.singletonMap("NullPointer Error", e.getMessage()));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                new ResponseObject(false, 0, "", e.getMessage())
+                responseObject
         );
     }
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public static ResponseEntity<ResponseObject> handleException(Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                new ResponseObject(false, 0, e.toString(), e.getMessage())
+        ResponseObject responseObject = new ResponseObject(
+                false,
+                0,
+                ""
+        );
+        responseObject.setErrorMessage(java.util.Collections.singletonMap("INTERNAL SERVER ERROR", e.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                responseObject
         );
     }
 

@@ -1,7 +1,7 @@
 package com.example.easytourneybe.security.jwt;
 
-import com.example.easytourneybe.user.User;
-import com.example.easytourneybe.user.UserRepository;
+import com.example.easytourneybe.user.dto.User;
+import com.example.easytourneybe.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

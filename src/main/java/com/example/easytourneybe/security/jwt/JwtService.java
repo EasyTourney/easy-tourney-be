@@ -1,6 +1,6 @@
 package com.example.easytourneybe.security.jwt;
 
-import com.example.easytourneybe.user.User;
+import com.example.easytourneybe.user.dto.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;

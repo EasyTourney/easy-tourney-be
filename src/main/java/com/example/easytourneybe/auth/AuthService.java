@@ -2,8 +2,8 @@ package com.example.easytourneybe.auth;
 
 import com.example.easytourneybe.exceptions.AuthenticationException;
 import com.example.easytourneybe.security.jwt.JwtService;
-import com.example.easytourneybe.user.User;
-import com.example.easytourneybe.user.UserDTO;
+import com.example.easytourneybe.user.dto.User;
+import com.example.easytourneybe.user.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,7 +34,7 @@ public class AuthService {
 
         User user = (User) authentication.getPrincipal();
         String accessToken = jwtService.generateToken(user);
-        UserDTO userDto = UserDTO.builder().email(user.getEmail()).role(user.getRole()).firstName(user.getFirstName()).lastName(user.getLastName()).build();
+        UserDto userDto = UserDto.builder().email(user.getEmail()).role(user.getRole()).firstName(user.getFirstName()).lastName(user.getLastName()).build();
         return AuthResponse.builder().token(accessToken).userInfo(userDto).build();
     }
 }

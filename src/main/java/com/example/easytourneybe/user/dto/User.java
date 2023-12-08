@@ -1,4 +1,4 @@
-package com.example.easytourneybe.user;
+package com.example.easytourneybe.user.dto;
 
 import com.example.easytourneybe.enums.UserRole;
 import jakarta.persistence.*;

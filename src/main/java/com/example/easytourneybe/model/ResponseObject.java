@@ -15,14 +15,14 @@ public class ResponseObject {
     private Boolean success;
     private Integer total;
     private Object data;
-    private String message;
+    //private String message;
     private Map<String, Object> additionalData = new HashMap<>();
     private Map<String, String> errorMessage = new HashMap<>();
 
-    public ResponseObject(Boolean success, Integer total, Object data, String message) {
+    public ResponseObject(Boolean success, Integer total, Object data) {
         this.success = success;
         this.total = total;
         this.data = data;
-        this.message = message;
+       //this.message = message;
     }
 }

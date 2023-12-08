@@ -2,6 +2,7 @@ package com.example.easytourneybe.category;
 
 import com.example.easytourneybe.exceptions.InvalidRequestException;
 import com.example.easytourneybe.category.interfaces.CategoryRepository;
+import com.example.easytourneybe.validations.CommonValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,7 @@ import java.util.*;
 public class CategoryServiceImpl implements com.example.easytourneybe.category.interfaces.CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
+    private final CommonValidation commonValidation=new CommonValidation();
 
     @Override
     public Category createCategory(String categoryName) {
@@ -33,16 +35,12 @@ public class CategoryServiceImpl implements com.example.easytourneybe.category.i
     public boolean hasExistCategoryName(String categoryName) {
         return categoryRepository.findCategoriesByName(categoryName) != null;
     }
-    @Override
-    public void validatePageAndSize(int page, int size) {
-        if (page < 0 || size <= 0) {
-            throw new InvalidRequestException("Page must be greater than or equal to zero, and size must be greater than zero");
-        }
-    }
+
     @Override
     public Sort getSorting(String sortType, String sortValue) {
         if (Objects.equals(sortType, "") || sortType == null)  {
             sortValue="categoryId";
+            sortType="desc";
         }
         Sort sorting = Sort.by(sortValue);
 
@@ -60,7 +58,7 @@ public class CategoryServiceImpl implements com.example.easytourneybe.category.i
 
     @Override
     public List<Category> searchAndSortCategories(String keyword, String sortType, int page, int size, String sortValue) {
-        validatePageAndSize(page, size);
+        commonValidation.validatePageAndSize(page, size);
 
         Sort sorting = getSorting(sortType, sortValue);
         Pageable pageable = PageRequest.of(page, size, sorting);

@@ -20,7 +20,5 @@ public interface CategoryService {
 
     long totalCategory(String keyword);
 
-    void validatePageAndSize(int page, int size);
-
     Sort getSorting(String sortType, String sortValue);
 }
