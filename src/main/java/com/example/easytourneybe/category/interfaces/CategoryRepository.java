@@ -18,6 +18,7 @@ public interface CategoryRepository extends JpaRepository<Category,Long> {
     Category findCategoriesByName(@Param("categoryName") String categoryName);
     @Query("SELECT c FROM Category c WHERE c.categoryId = :id AND c.isDeleted = false")
     Optional<Category> findCategoryById(@Param("id") Long id);
+    List<Category> findAllByIsDeletedFalse();
 
 
 }

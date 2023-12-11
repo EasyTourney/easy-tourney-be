@@ -109,6 +109,6 @@ public class CategoryServiceImpl implements com.example.easytourneybe.category.i
     }
 
     public List<Category> findAllCategories() {
-        return categoryRepository.findAll();
+        return categoryRepository.findAllByIsDeletedFalse();
     }
 }
