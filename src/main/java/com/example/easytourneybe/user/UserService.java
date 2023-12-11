@@ -60,7 +60,8 @@ public class UserService implements UserDetailsService {
             userRepository.save(organizer);
             return Optional.of(organizer);
         } else {
-            throw new NoSuchElementException("Category not found");
+            throw new NoSuchElementException("Organizer not found");
         }
     }
+
 }

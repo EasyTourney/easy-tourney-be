@@ -32,7 +32,7 @@ public class UserDao {
                 "WHERE " +
                 "    u.role = 'ORGANIZER' AND u.is_deleted = false " +
                 "    AND (LOWER(u.email) LIKE LOWER(:keyword) " +
-                "    OR LOWER(u.first_name) LIKE LOWER(:keyword)) " +
+                "    OR LOWER(CONCAT(u.first_name, ' ', u.last_name)) LIKE LOWER(:keyword)) " +
                 "GROUP BY " +
                 "    u.id " +
                 "ORDER BY " +
