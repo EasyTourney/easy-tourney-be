@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -55,11 +54,11 @@ public class UserService implements UserDetailsService {
         Optional<User> foundUser = userRepository.findOrganizerById(id);
 
         if (foundUser.isPresent()) {
-            User category = foundUser.get();
-            category.setIsDeleted(true);
-            category.setDeletedAt(LocalDateTime.now());
-            userRepository.save(category);
-            return Optional.of(category);
+            User organizer = foundUser.get();
+            organizer.setIsDeleted(true);
+            organizer.setDeletedAt(LocalDateTime.now());
+            userRepository.save(organizer);
+            return Optional.of(organizer);
         } else {
             throw new NoSuchElementException("Category not found");
         }

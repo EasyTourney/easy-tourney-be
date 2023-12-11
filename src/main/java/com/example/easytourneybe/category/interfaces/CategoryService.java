@@ -21,4 +21,6 @@ public interface CategoryService {
     long totalCategory(String keyword);
 
     Sort getSorting(String sortType, String sortValue);
+
+    List<Category> findAllCategories();
 }

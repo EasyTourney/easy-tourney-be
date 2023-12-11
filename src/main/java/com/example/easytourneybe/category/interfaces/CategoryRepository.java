@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CategoryRepository extends JpaRepository<Category,Long> {
     @Query("SELECT count(c) FROM Category c WHERE LOWER(c.categoryName) LIKE LOWER(CONCAT('%', :keyword, '%')) AND c.isDeleted = false")
@@ -15,6 +16,8 @@ public interface CategoryRepository extends JpaRepository<Category,Long> {
     List<Category> findCategoriesByName(@Param("keyword") String keyword, Pageable pageable);
     @Query("SELECT c FROM Category c WHERE LOWER(c.categoryName) = LOWER(:categoryName) AND c.isDeleted = false")
     Category findCategoriesByName(@Param("categoryName") String categoryName);
+    @Query("SELECT c FROM Category c WHERE c.categoryId = :id AND c.isDeleted = false")
+    Optional<Category> findCategoryById(@Param("id") Long id);
 
 
 }

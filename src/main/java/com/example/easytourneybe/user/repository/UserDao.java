@@ -51,7 +51,7 @@ public class UserDao {
                  .setFirstResult(page  * size)
                  .setMaxResults(size)
                  .getResultList();
-
+         session.close();
         return result;
     }
 

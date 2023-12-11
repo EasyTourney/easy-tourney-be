@@ -37,6 +37,7 @@ public class CategoryController {
                 new ResponseObject(false, 0, "")
         );
     }
+
     @GetMapping("")
     public ResponseEntity<ResponseObject> searchCategoryByNameContaining(
             @RequestParam(defaultValue = "") String keyword,
@@ -76,6 +77,14 @@ public class CategoryController {
         Category temp = CategoryService.createCategory(category.getCategoryName().trim());
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ResponseObject(true, 1, temp)
+        );
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<ResponseObject> findAllCategories() {
+        List<Category> foundCategories = CategoryService.findAllCategories();
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject(true, foundCategories.size(), foundCategories)
         );
     }
 }
