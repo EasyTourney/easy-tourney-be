@@ -1,13 +1,14 @@
 package com.example.easytourneybe.category;
 
-import jakarta.persistence.Entity;
+import com.example.easytourneybe.util.RegexpUtils;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import org.hibernate.validator.constraints.Length;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,9 +22,9 @@ public class Category {
     @Column(name = "categoryId")
     private Long categoryId;
 
-    @Pattern(regexp = "^[a-zA-Z0-9\\s]*$", message = "Category name must be alphanumeric")
+    @Pattern(regexp = RegexpUtils.CATEGORY_REGEXP, message = "Category name must be alphanumeric")
     @NotBlank(message = "Category name must be between 2 and 30 characters")
-    @Size(min = 2, max = 30, message = "Category name must be between 2 and 30 characters")
+    @Length(min = 2, max = 30, message = "Category name must be between 2 and 30 characters")
     @Column(name = "categoryName", nullable = false)
     private String categoryName;
 

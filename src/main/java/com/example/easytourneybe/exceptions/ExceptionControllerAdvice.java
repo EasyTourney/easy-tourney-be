@@ -1,28 +1,27 @@
 package com.example.easytourneybe.exceptions;
 
 import com.example.easytourneybe.model.ResponseObject;
-import jakarta.validation.ConstraintViolationException;
+import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestControllerAdvice
-public class ExceptionControllerAdvice {
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseObject handleInvalidArgument(MethodArgumentNotValidException ex) {
-        Map<String, String> errMap = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(e -> errMap.put(e.getField(), e.getDefaultMessage()));
-        return ResponseObject.builder().errorMessage(errMap).success(false).build();
-    }
+public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -51,13 +50,13 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler(InvalidRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public static ResponseEntity<ResponseObject> handleInvalidPageAndSizeException(InvalidRequestException e) {
+    public static ResponseEntity<ResponseObject> handleInvalidException(InvalidRequestException e) {
         ResponseObject responseObject = new ResponseObject(
                 false,
                 0,
                 ""
         );
-        responseObject.setErrorMessage(java.util.Collections.singletonMap("InvalidPageAndSize Error", e.getMessage()));
+        responseObject.setErrorMessage(java.util.Collections.singletonMap("Invalid Error", e.getMessage()));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 responseObject
         );
@@ -76,6 +75,7 @@ public class ExceptionControllerAdvice {
                 responseObject
         );
     }
+
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public static ResponseEntity<ResponseObject> handleNullPointerException(NullPointerException e) {
@@ -89,6 +89,7 @@ public class ExceptionControllerAdvice {
                 responseObject
         );
     }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public static ResponseEntity<ResponseObject> handleException(Exception e) {
@@ -104,4 +105,35 @@ public class ExceptionControllerAdvice {
     }
 
 
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            @Nonnull HttpHeaders headers,
+            @Nonnull HttpStatusCode status,
+            @Nonnull WebRequest request) {
+        Map<String, String> errMap = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(err -> errMap.put(err.getField(), err.getDefaultMessage()));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ResponseObject.builder()
+                        .success(false)
+                        .errorMessage(errMap)
+                        .build()
+        );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            @Nonnull HttpHeaders headers,
+            @Nonnull HttpStatusCode status,
+            @Nonnull WebRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ResponseObject.builder()
+                        .success(false)
+                        .total(0)
+                        .errorMessage(java.util.Collections.singletonMap("Invalid Error", ex.getMessage()))
+                        .build()
+        );
+    }
 }

@@ -1,6 +1,6 @@
 package com.example.easytourneybe.user.transformer;
 
-import com.example.easytourneybe.user.dto.OrganizerDto;
+import com.example.easytourneybe.user.dto.OrganizerTableDto;
 import org.hibernate.transform.ResultTransformer;
 
 import java.sql.Timestamp;
@@ -14,16 +14,16 @@ public class OrganizerTransformer implements ResultTransformer {
     }
     @Override
     public Object transformTuple(Object[] tuple, String[] aliases) {
-        OrganizerDto organizerDTO = new OrganizerDto();
-        organizerDTO.setId((Integer) tuple[0]);
-        organizerDTO.setEmail((String) tuple[1]);
-        organizerDTO.setFullName((String) tuple[2]);
-        organizerDTO.setPhoneNumber((String) tuple[3]);
+        OrganizerTableDto organizerTableDTO = new OrganizerTableDto();
+        organizerTableDTO.setId((Integer) tuple[0]);
+        organizerTableDTO.setEmail((String) tuple[1]);
+        organizerTableDTO.setFullName((String) tuple[2]);
+        organizerTableDTO.setPhoneNumber((String) tuple[3]);
         Timestamp timestamp = (Timestamp) tuple[4];
         LocalDateTime localDateTime = timestamp.toLocalDateTime();
-        organizerDTO.setCreatedAt(localDateTime);
-        organizerDTO.setTotalTournament((Long) tuple[5]);
-        return organizerDTO;
+        organizerTableDTO.setCreatedAt(localDateTime);
+        organizerTableDTO.setTotalTournament((Long) tuple[5]);
+        return organizerTableDTO;
     }
 
 

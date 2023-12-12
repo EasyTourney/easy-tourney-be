@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OrganizerDto {
+public class OrganizerTableDto {
 
     private Integer id;
     private String email;
