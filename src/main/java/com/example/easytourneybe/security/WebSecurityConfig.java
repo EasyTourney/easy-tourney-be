@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -42,7 +43,9 @@ public class WebSecurityConfig {
                         request
                                 .requestMatchers(WHITE_LIST_URL).permitAll()
                                 .requestMatchers(SWAGGER_LIST_URL).permitAll()
-                                .requestMatchers(ONLY_ADMIN_LIST_URL).hasAuthority(UserRole.ADMIN.name())
+                                .requestMatchers(HttpMethod.POST, ONLY_ADMIN_LIST_URL).hasAuthority(UserRole.ADMIN.name())
+                                .requestMatchers(HttpMethod.PUT, ONLY_ADMIN_LIST_URL).hasAuthority(UserRole.ADMIN.name())
+                                .requestMatchers(HttpMethod.DELETE, ONLY_ADMIN_LIST_URL).hasAuthority(UserRole.ADMIN.name())
                                 .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider);
