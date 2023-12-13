@@ -62,7 +62,7 @@ public class CategoryServiceImpl implements com.example.easytourneybe.category.i
 
         Sort sorting = getSorting(sortType, sortValue);
         Pageable pageable = PageRequest.of(page, size, sorting);
-        List<Category> foundCategories = categoryRepository.findCategoriesByName(keyword.trim(), pageable);
+        List<Category> foundCategories = categoryRepository.findCategoriesByName(commonValidation.escapeSpecialCharacters(keyword.trim()), pageable);
 
         if (foundCategories.isEmpty()) {
             throw new NoSuchElementException("Category not found");
@@ -105,7 +105,7 @@ public class CategoryServiceImpl implements com.example.easytourneybe.category.i
         }
     }
     public long totalCategory(String keyword) {
-        return categoryRepository.totalCategory(keyword);
+        return categoryRepository.totalCategory(commonValidation.escapeSpecialCharacters(keyword.trim()));
     }
 
     public List<Category> findAllCategories() {

@@ -24,6 +24,7 @@ public class UserDao {
                 "    u.phone_number, " +
                 "    u.created_at, " +
                 "   COUNT(ot.tournament_id) AS totalTournament " +
+                "   u.date_of_birth " +
                 "FROM " +
                 "    users u " +
                 "LEFT JOIN " +

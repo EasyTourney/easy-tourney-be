@@ -52,7 +52,7 @@ public class UserService implements UserDetailsService {
             sortValue = "id";
             sortType = "desc";
         }
-        List<OrganizerTableDto> foundUser = userDao.organizerTable(keyword, sortValue, sortType, page, size);
+        List<OrganizerTableDto> foundUser = userDao.organizerTable(commonValidation.escapeSpecialCharacters(keyword.trim()), sortValue, sortType, page, size);
         if (foundUser.isEmpty()) {
             throw new NoSuchElementException("Organizer not found");
         }
@@ -61,7 +61,7 @@ public class UserService implements UserDetailsService {
     }
 
     public long totalOrganizer(String keyword) {
-        return userRepository.totalOrganizer(keyword);
+        return userRepository.totalOrganizer(commonValidation.escapeSpecialCharacters(keyword.trim()));
     }
 
     public Optional<User> deleteOrganizer(Integer id) {
