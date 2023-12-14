@@ -1,7 +1,7 @@
 package com.example.easytourneybe.util;
 
 public class RegexpUtils {
-    public static final String PHONE_NUMBER_REGEXP = "^\\+?[0-9]{10,11}$";
+    public static final String PHONE_NUMBER_REGEXP = "^0(?!0+$)[0-9]{9,10}$";
 
     public static final String NAME_REGEXP = "^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\\s]*$";
 

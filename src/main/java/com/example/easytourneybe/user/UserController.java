@@ -87,9 +87,9 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getOrganizer(@PathVariable Integer id) {
-        Optional<User> user = userService.getOrganizer(id);
+        User user = userService.getOrganizer(id);
 
-        OrganizerUpSertDto temp = OrganizerUpSertDto.fromUser(user.get());
+        OrganizerUpSertDto temp = OrganizerUpSertDto.fromUser(user);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseObject.builder()
                 .success(true)
                 .total(1)

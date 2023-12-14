@@ -32,12 +32,12 @@ public class OrganizerUpSertDto {
 
     @NotBlank(message = "First name must not be empty")
     @Pattern(regexp = RegexpUtils.NAME_REGEXP, message = "First name must be alphabetic")
-    @Length(min = 2, max = 30, message = "First name must be at least 2 and maximum 30 characters")
+    @Length(max = 30, message = "First name must be maximum 30 characters")
     private String firstName;
 
     @NotBlank(message = "Last name must not be empty")
     @Pattern(regexp = RegexpUtils.NAME_REGEXP, message = "Last name must be alphabetic")
-    @Length(min = 2, max = 30, message = "Last name must be at least 2 and maximum 30 characters")
+    @Length(max = 30, message = "Last name must be maximum 30 characters")
     private String lastName;
 
     @NotNull(message = "Phone number must not be empty")
@@ -54,7 +54,7 @@ public class OrganizerUpSertDto {
     private String password;
 
     public void setEmail(String email) {
-        this.email = (email != null) ? email.trim() : null;
+        this.email = (email != null) ? email.trim().toLowerCase() : null;
     }
 
     public void setFirstName(String firstName) {
@@ -78,6 +78,9 @@ public class OrganizerUpSertDto {
     }
 
     public void setDateOfBirth (String dateOfBirth) {
+        if (dateOfBirth == null) {
+            return;
+        }
         try {
             OffsetDateTime odt = OffsetDateTime.parse(dateOfBirth.trim());
             this.dateOfBirth = odt.toLocalDate();

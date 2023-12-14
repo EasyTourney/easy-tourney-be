@@ -87,8 +87,9 @@ public class UserService implements UserDetailsService {
     }
 
     public User createOrganizer(OrganizerUpSertDto organizer) {
-        if (!DateValidatorUtils.isBeforeToday(organizer.getDateOfBirth())) {
-            throw new InvalidRequestException("Date of birth must be today or after today");
+        if (organizer.getDateOfBirth() != null
+                && !DateValidatorUtils.isBeforeToday(organizer.getDateOfBirth())) {
+            throw new InvalidRequestException("Date of birth must be before today");
         }
 
         User user = userRepository.findExistEmail(organizer.getEmail());
@@ -109,11 +110,12 @@ public class UserService implements UserDetailsService {
     }
 
     public User updateOrganizer(Integer id, OrganizerUpSertDto organizer) {
-        if (!DateValidatorUtils.isBeforeToday(organizer.getDateOfBirth())) {
-            throw new InvalidRequestException("Date of birth must be today or after today");
+        if (organizer.getDateOfBirth() != null
+                && !DateValidatorUtils.isBeforeToday(organizer.getDateOfBirth())) {
+            throw new InvalidRequestException("Date of birth must be before today");
         }
 
-        User user = userRepository.findById(id).orElseThrow(() -> new InvalidRequestException("Organizer not found"));
+        User user = userRepository.findOrganizerById(id).orElseThrow(() -> new InvalidRequestException("Organizer not found"));
         User userByEmail = userRepository.findExistEmail(organizer.getEmail());
         if (userByEmail != null && !userByEmail.getId().equals(id)) {
             throw new InvalidRequestException("Email already exist");
@@ -123,17 +125,13 @@ public class UserService implements UserDetailsService {
         user.setFirstName(organizer.getFirstName());
         user.setLastName(organizer.getLastName());
         user.setPhoneNumber(organizer.getPhoneNumber());
-        user.setDateOfBirth(organizer.getDateOfBirth());
+        user.setDateOfBirth(organizer.getDateOfBirth() != null ? organizer.getDateOfBirth() : user.getDateOfBirth());
 
         return userRepository.save(user);
     }
 
-    public Optional<User> getOrganizer(Integer id) {
-        Optional<User> user = userRepository.findOrganizerById(id);
-        if (user.isEmpty()) {
-            throw new InvalidRequestException("Organizer not found");
-        }
-        return user;
+    public User getOrganizer(Integer id) {
+        return userRepository.findOrganizerById(id).orElseThrow(() -> new InvalidRequestException("Organizer not found"));
     }
 
     public User findByEmail(String email) {
