@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.sql.Date;
 
 @Data
 @AllArgsConstructor
@@ -20,6 +21,6 @@ public class OrganizerTableDto {
     private String phoneNumber;
     private LocalDateTime createdAt;
     private Long totalTournament;
-    private LocalDate dateOfBirth;
+    private Date dateOfBirth;
 
 }

@@ -23,7 +23,7 @@ public class UserDao {
                 "    CONCAT(u.first_name, ' ', u.last_name) AS fullName, " +
                 "    u.phone_number, " +
                 "    u.created_at, " +
-                "   COUNT(ot.tournament_id) AS totalTournament " +
+                "   COUNT(ot.tournament_id) AS totalTournament ," +
                 "   u.date_of_birth " +
                 "FROM " +
                 "    users u " +
@@ -47,6 +47,7 @@ public class UserDao {
                 .addScalar("phone_number", StandardBasicTypes.STRING)
                 .addScalar("created_at", StandardBasicTypes.TIMESTAMP)
                 .addScalar("totalTournament", StandardBasicTypes.LONG)
+                .addScalar("date_of_birth", StandardBasicTypes.DATE)
                 .setResultTransformer(new OrganizerTransformer())
                 .setFirstResult(page * size)
                 .setMaxResults(size)
