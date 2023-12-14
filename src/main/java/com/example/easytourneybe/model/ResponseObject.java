@@ -16,8 +16,8 @@ public class ResponseObject {
     private Integer total;
     private Object data;
     //private String message;
-    private Map<String, Object> additionalData = new HashMap<>();
-    private Map<String, String> errorMessage = new HashMap<>();
+    private Map<String, Object> additionalData;
+    private Map<String, String> errorMessage;
 
     public ResponseObject(Boolean success, Integer total, Object data) {
         this.success = success;

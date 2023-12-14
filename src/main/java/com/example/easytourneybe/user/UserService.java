@@ -1,15 +1,18 @@
 package com.example.easytourneybe.user;
 
+
 import com.example.easytourneybe.constants.DefaultPassword;
 import com.example.easytourneybe.enums.UserRole;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
 import com.example.easytourneybe.user.dto.OrganizerTableDto;
-import com.example.easytourneybe.user.dto.User;
 import com.example.easytourneybe.user.dto.OrganizerUpSertDto;
+import com.example.easytourneybe.user.dto.User;
+import com.example.easytourneybe.user.dto.UserDto;
 import com.example.easytourneybe.user.repository.UserDao;
 import com.example.easytourneybe.user.repository.UserRepository;
 import com.example.easytourneybe.util.DateValidatorUtils;
 import com.example.easytourneybe.validations.CommonValidation;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -33,7 +36,13 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     PasswordEncoder passwordEncoder;
-
+    @Autowired
+    EntityManager entityManager;
+    private final String FIND_USER_BY_TOURNAMENT_ID =
+            "SELECT u.*                                                 \n" +
+            "FROM users u                                               \n" +
+            "JOIN organizer_tournament ot ON u.id = ot.user_id          \n" +
+            "WHERE tournament_id = ?";
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -45,9 +54,8 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found with username or email: " + username));
     }
-
     public List<OrganizerTableDto> organizerTable(String keyword, String sortType, int page, int size, String sortValue) {
-        commonValidation.validatePageAndSize(page, size);
+    commonValidation.validatePageAndSize(page, size);
         if (sortType == null || sortType.isEmpty()) {
             sortValue = "id";
             sortType = "desc";
@@ -126,5 +134,28 @@ public class UserService implements UserDetailsService {
             throw new InvalidRequestException("Organizer not found");
         }
         return user;
+    }
+
+    public User findByEmail(String email) {
+        return userRepository.findUserByEmail(email).get();
+    }
+
+    public List<UserDto> findUserByTournamentId(Integer tournamentId) {
+        List<User> users = entityManager.createNativeQuery(FIND_USER_BY_TOURNAMENT_ID, User.class)
+                                        .setParameter(1, tournamentId)
+                                        .getResultList();
+
+        return convertUserToUserDTO(users);
+    }
+    public List<UserDto> convertUserToUserDTO(List<User> users) {
+        return users.stream()
+                .map(user -> UserDto.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .email(user.getEmail())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .build())
+                .toList();
     }
 }

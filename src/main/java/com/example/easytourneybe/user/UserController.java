@@ -4,10 +4,13 @@ import com.example.easytourneybe.model.ResponseObject;
 import com.example.easytourneybe.user.dto.OrganizerTableDto;
 import com.example.easytourneybe.user.dto.User;
 import com.example.easytourneybe.user.dto.OrganizerUpSertDto;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -93,5 +96,14 @@ public class UserController {
                 .data(temp)
                 .build()
         );
+    }
+
+    @GetMapping("/getMe")
+    public ResponseEntity<?> getMe() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.findByEmail(username);
+        OrganizerUpSertDto result = OrganizerUpSertDto.fromUser(user);
+        return ResponseEntity.ok(ResponseObject.builder()
+                .success(true).data(result).build());
     }
 }

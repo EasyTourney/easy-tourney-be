@@ -1,6 +1,7 @@
 package com.example.easytourneybe.user.dto;
 
 import com.example.easytourneybe.enums.UserRole;
+import com.example.easytourneybe.tournament.Tournament;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -67,6 +68,9 @@ public class User implements UserDetails {
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
+
+    @ManyToMany(mappedBy = "users")
+    private List<Tournament> tournaments;
 
     @PrePersist
     protected void onCreate() {
