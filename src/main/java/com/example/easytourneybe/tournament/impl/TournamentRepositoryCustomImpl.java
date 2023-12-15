@@ -4,6 +4,7 @@ import com.example.easytourneybe.enums.tournament.TournamentFormat;
 import com.example.easytourneybe.enums.tournament.TournamentStatus;
 import com.example.easytourneybe.eventdate.EventDate;
 import com.example.easytourneybe.eventdate.EventDateService;
+import com.example.easytourneybe.model.ResponseObject;
 import com.example.easytourneybe.tournament.TournamentDto;
 import com.example.easytourneybe.tournament.TournamentRepositoryCustom;
 import com.example.easytourneybe.user.dto.UserDto;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class TournamentRepositoryCustomImpl implements TournamentRepositoryCustom {
@@ -27,32 +29,37 @@ public class TournamentRepositoryCustomImpl implements TournamentRepositoryCusto
     UserService userService;
 
     private final String GET_TOURNAMENT_BY_USERID =
-            "SELECT t.tournament_id tourmamentId, title, c.category_id, category_name category,       " +
-            "       t.created_at createdAt, status, match_duration matchDuration, format            \n" +
+            "SELECT t.tournament_id tourmamentId, title, c.category_id, category_name category,     \n" +
+            "       t.created_at createdAt, status, match_duration matchDuration, format,           \n" +
+            "       (SELECT COUNT(distinct tournament_id)                                           \n" +
+                    "       FROM organizer_tournament where %s) AS total_records                    \n" +
             "FROM  tournament t                                                                     \n" +
             "   JOIN organizer_tournament ot on t.tournament_id = ot.tournament_id                  \n" +
             "   JOIN category c on c.category_id = t.category_id                                    \n" +
             "WHERE %s and %s and %s                                                                 \n" +
-           "GROUP BY t.tournament_id, title, c.category_id, category_name,                            " +
+           "GROUP BY t.tournament_id, title, c.category_id, category_name,                          \n" +
                     "t.created_at, status, match_duration, format                                   \n" +
             "ORDER BY %s %s                                                                         \n" +
             "LIMIT :pageSize                                                                        \n" +
             "OFFSET :off_set";
     @Override
-    public List<TournamentDto> findAllByUserId(Integer userId, Integer page, Integer pageSize, String sortType, String field, TournamentStatus status, String search) {
+    public ResponseObject findAllByUserId(Integer userId, Integer page, Integer pageSize, String sortType, String field, TournamentStatus status, String search) {
         String userIdFilter = "true";
-        if (userId != null) userIdFilter = "ot.user_id=" + userId;
+        if (userId != null) userIdFilter = "user_id=" + userId;
         String statusFilter = "true";
         if (status != null) statusFilter = "status='" + status + "'";
         String searchFilter = "true";
         if (!search.equals("")) searchFilter = "(t.title LIKE '%" + search + "%' OR c.category_name LIKE '%" + search + "%')";
-        String sql = String.format(GET_TOURNAMENT_BY_USERID, userIdFilter, statusFilter, searchFilter, field, sortType);
+        String sql = String.format(GET_TOURNAMENT_BY_USERID, userIdFilter, userIdFilter, statusFilter, searchFilter, field, sortType);
         List<Object[]> rows = entityManager.createNativeQuery(sql)
                 .setParameter("pageSize", pageSize)
                 .setParameter("off_set", page*pageSize)
                 .getResultList();
-
-        return rows.stream().map(row -> {
+        Long totalLong = (Long) rows.get(0)[8];
+        String totalStr = String.valueOf(totalLong);
+        Integer total = Integer.valueOf(totalStr);
+        List<TournamentDto> data =
+                rows.stream().map(row -> {
             Timestamp timestamp = (Timestamp) row[4];
             Integer tournamentId = (Integer) row[0];
             List<EventDate> eventDates = eventDateService.findAllByTournamentId(tournamentId);
@@ -69,5 +76,11 @@ public class TournamentRepositoryCustomImpl implements TournamentRepositoryCusto
                     .organizers(userDTOs)
                     .build();
             }).toList();
+        return ResponseObject.builder()
+                .data(data)
+                .total(data.size())
+                .success(true)
+                .additionalData(Map.of("totalTournament", total))
+                .build();
     }
 }

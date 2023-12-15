@@ -3,6 +3,7 @@ package com.example.easytourneybe.tournament;
 import com.example.easytourneybe.enums.tournament.TournamentStatus;
 import com.example.easytourneybe.enums.UserRole;
 import com.example.easytourneybe.eventdate.EventDateService;
+import com.example.easytourneybe.model.ResponseObject;
 import com.example.easytourneybe.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -23,7 +24,7 @@ public class TournamentService {
     @Autowired
     private EventDateService eventDateService;
 
-    public List<TournamentDto> getAll(Integer page, Integer pageSize, String field, String sortType, TournamentStatus status, String search) {
+    public ResponseObject getAll(Integer page, Integer pageSize, String field, String sortType, TournamentStatus status, String search) {
         search = search.replaceAll("%", "\\\\%");
         search = search.replaceAll("_", "\\\\_");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -32,7 +33,7 @@ public class TournamentService {
             if (UserRole.ADMIN.name().equals(o.toString())) isAdmin = true;
             if (UserRole.ORGANIZER.name().equals(o.toString())) isOrganizer = true;
         }
-        List<TournamentDto> results;
+        ResponseObject results;
         if(isAdmin) {
             results = tournamentRepository.findAllByUserId(null, page, pageSize, sortType, field, status, search);
        } else if (isOrganizer) {
