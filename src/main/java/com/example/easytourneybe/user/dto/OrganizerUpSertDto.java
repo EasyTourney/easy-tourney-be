@@ -16,7 +16,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 
 @Data
 @Builder
@@ -82,8 +81,7 @@ public class OrganizerUpSertDto {
             return;
         }
         try {
-            OffsetDateTime odt = OffsetDateTime.parse(dateOfBirth.trim());
-            this.dateOfBirth = odt.toLocalDate();
+            this.dateOfBirth = LocalDate.parse(dateOfBirth.trim());
         } catch (Exception e) {
             throw new HttpMessageNotReadableException("Date of birth must be valid");
         }
