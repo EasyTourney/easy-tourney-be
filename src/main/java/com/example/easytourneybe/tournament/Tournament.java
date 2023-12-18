@@ -28,9 +28,8 @@ public class Tournament {
     @Column(name = "title")
     private String title;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+    @Column(name = "category_id")
+    private Integer categoryId;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -55,11 +54,6 @@ public class Tournament {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @ManyToMany
-    @JoinTable(
-            name = "organizer_tournament",
-            joinColumns = @JoinColumn(name = "tournament_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private List<User> users;
+
+
 }

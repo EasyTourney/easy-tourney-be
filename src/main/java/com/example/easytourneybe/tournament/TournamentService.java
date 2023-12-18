@@ -5,12 +5,16 @@ import com.example.easytourneybe.enums.UserRole;
 import com.example.easytourneybe.eventdate.EventDateService;
 import com.example.easytourneybe.model.ResponseObject;
 import com.example.easytourneybe.user.UserService;
+import com.example.easytourneybe.user.dto.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class TournamentService {
@@ -43,5 +47,18 @@ public class TournamentService {
             return null;
         }
         return results;
+    }
+    public Optional<Tournament> deleteTournament(Integer id) {
+        Optional<Tournament> foundTournament = tournamentRepository.findTournamentByIdAndIsDeletedFalse(id);
+        if (foundTournament.isPresent()) {
+            Tournament tournament = foundTournament.get();
+            tournament.setIsDeleted(true);
+            tournament.setDeletedAt(LocalDateTime.now());
+            tournament.setStatus(TournamentStatus.DELETED);
+            tournamentRepository.save(tournament);
+            return Optional.of(tournament);
+        } else {
+            throw new NoSuchElementException("Tournament not found");
+        }
     }
 }

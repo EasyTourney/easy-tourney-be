@@ -69,9 +69,6 @@ public class User implements UserDetails {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
-    @ManyToMany(mappedBy = "users")
-    private List<Tournament> tournaments;
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

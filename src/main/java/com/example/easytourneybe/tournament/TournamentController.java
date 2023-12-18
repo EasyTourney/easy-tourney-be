@@ -1,11 +1,13 @@
 package com.example.easytourneybe.tournament;
 import com.example.easytourneybe.enums.tournament.TournamentStatus;
+import com.example.easytourneybe.model.ResponseObject;
+import com.example.easytourneybe.user.dto.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 import java.util.List;
 
@@ -26,5 +28,11 @@ public class TournamentController {
                                     ) {
 
         return ResponseEntity.ok(tournamentService.getAll(page-1, pageSize, field, sortType.toUpperCase(), status, search.trim()));
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseObject> delete(@PathVariable Integer id) {
+        Optional<Tournament> deleteTournament = tournamentService.deleteTournament(id);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject(true, 1, deleteTournament));
     }
 }
