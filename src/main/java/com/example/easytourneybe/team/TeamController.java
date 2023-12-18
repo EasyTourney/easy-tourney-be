@@ -13,20 +13,24 @@ import static com.example.easytourneybe.constants.DefaultListParams.SIZE;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/team")
+@RequestMapping("/tournament")
 public class TeamController {
     @Autowired
     private TeamService TeamService;
-    @GetMapping("/all")
+    @GetMapping("/{id}/team")
     public ResponseEntity<ResponseObject> findAllTeamAndPlayer(
+            @PathVariable Long id ,
             @RequestParam(defaultValue = SIZE) Integer size,
             @RequestParam(defaultValue = PAGE) Integer page
-
-
     ) {
-        List<TeamPlayerDto> teamAndPlayer = TeamService.getAllTeamAndPlayerCount(page-1,size);
+        Long totalTeamRecords = TeamService.getTotalRecordsForTournament(id);
+        List<TeamPlayerDto> teamAndPlayer = TeamService.getAllTeamAndPlayerCount(id, page-1,size);
+        ResponseObject responseObject = new ResponseObject(
+                true, teamAndPlayer.size(), teamAndPlayer
+        );
+        responseObject.setAdditionalData(java.util.Collections.singletonMap("totalTeamOfTournament", totalTeamRecords));
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject(true, teamAndPlayer.size(), teamAndPlayer)
+                responseObject
         );
     }
 }

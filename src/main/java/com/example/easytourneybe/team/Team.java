@@ -19,7 +19,7 @@ public class Team {
     @Column(name = "name")
     private String teamName;
     @Column(name = "tournament_id")
-    private boolean isDeleted;
+    private Long tournamentId;
     @Column(name = "score")
     private Integer score;
     @Column(name = "updatedAt")

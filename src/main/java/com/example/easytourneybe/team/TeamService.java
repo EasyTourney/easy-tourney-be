@@ -15,11 +15,14 @@ public class TeamService {
     private TeamRepository teamRepository;
 
 
-       public List<TeamPlayerDto> getAllTeamAndPlayerCount(Integer page, Integer size) {
+       public List<TeamPlayerDto> getAllTeamAndPlayerCount(Long id, Integer page, Integer size) {
             Pageable pageable= PageRequest.of(page,size);
-           return teamRepository.getAllTeamAndPlayerCount(pageable).stream()
+           return teamRepository.getAllTeamAndPlayerCount(id, pageable).stream()
                    .map(teamData -> new TeamPlayerDto((Long) teamData[0], (String) teamData[1], (Long) teamData[2]))
                    .collect(Collectors.toList());
 
    }
+        public long getTotalRecordsForTournament(Long id) {
+            return teamRepository.getTotalRecordsForTournament(id);
+    }
 }
