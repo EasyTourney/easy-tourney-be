@@ -9,5 +9,5 @@ public class RegexpUtils {
 
     public static final String DATE_REGEXP = "^\\d{4}-\\d{2}-\\d{2}$";
 
-    public static final String EMAIL_REGEXP = "^[a-zA-Z0-9_+.-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z0-9.-]{2,}$";
+    public static final String EMAIL_REGEXP = "^[a-zA-Z0-9]+[a-zA-Z0-9.]+[a-zA-Z0-9]+@[a-zA-Z0-9.-]+\\.[a-zA-Z0-9.-]{2,}$";
 }
