@@ -1,9 +1,7 @@
 package com.example.easytourneybe.tournament;
 
-import com.example.easytourneybe.category.Category;
 import com.example.easytourneybe.enums.tournament.TournamentFormat;
 import com.example.easytourneybe.enums.tournament.TournamentStatus;
-import com.example.easytourneybe.user.dto.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -53,7 +50,4 @@ public class Tournament {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-
-
 }

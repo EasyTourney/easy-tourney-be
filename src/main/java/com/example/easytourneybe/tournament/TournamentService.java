@@ -28,7 +28,7 @@ public class TournamentService {
     @Autowired
     private EventDateService eventDateService;
 
-    public ResponseObject getAll(Integer page, Integer pageSize, String field, String sortType, TournamentStatus status, String search) {
+    public ResponseObject getAll(Integer page, Integer pageSize, String field, String sortType, TournamentStatus status, String search, Integer categoryId) {
         search = search.replaceAll("%", "\\\\%");
         search = search.replaceAll("_", "\\\\_");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -39,10 +39,10 @@ public class TournamentService {
         }
         ResponseObject results;
         if(isAdmin) {
-            results = tournamentRepository.findAllByUserId(null, page, pageSize, sortType, field, status, search);
+            results = tournamentRepository.findAllByUserId(null, page, pageSize, sortType, field, status, search, categoryId);
        } else if (isOrganizer) {
             Integer userId = userService.findByEmail(authentication.getName()).getId();
-            results = tournamentRepository.findAllByUserId(userId, page, pageSize, sortType, field, status, search);
+            results = tournamentRepository.findAllByUserId(userId, page, pageSize, sortType, field, status, search, categoryId);
         } else {
             return null;
         }
