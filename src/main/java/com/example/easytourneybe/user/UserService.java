@@ -4,10 +4,7 @@ package com.example.easytourneybe.user;
 import com.example.easytourneybe.constants.DefaultPassword;
 import com.example.easytourneybe.enums.UserRole;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
-import com.example.easytourneybe.user.dto.OrganizerTableDto;
-import com.example.easytourneybe.user.dto.OrganizerUpSertDto;
-import com.example.easytourneybe.user.dto.User;
-import com.example.easytourneybe.user.dto.UserDto;
+import com.example.easytourneybe.user.dto.*;
 import com.example.easytourneybe.user.repository.UserDao;
 import com.example.easytourneybe.user.repository.UserRepository;
 import com.example.easytourneybe.util.DateValidatorUtils;
@@ -139,21 +136,25 @@ public class UserService implements UserDetailsService {
     }
 
     public List<UserDto> findUserByTournamentId(Integer tournamentId) {
-        List<User> users = entityManager.createNativeQuery(FIND_USER_BY_TOURNAMENT_ID, User.class)
-                                        .setParameter(1, tournamentId)
-                                        .getResultList();
-
-        return convertUserToUserDTO(users);
+        return userRepository.findUserByTournamentId(tournamentId);
     }
-    public List<UserDto> convertUserToUserDTO(List<User> users) {
-        return users.stream()
-                .map(user -> UserDto.builder()
-                        .id(user.getId())
-                        .email(user.getEmail())
-                        .email(user.getEmail())
-                        .firstName(user.getFirstName())
-                        .lastName(user.getLastName())
-                        .build())
-                .toList();
+
+    public List<OrganizerInGeneralDto> findOrganizerInGeneral(Integer tournamentId) {
+        return userRepository.findOrganizerInGeneral(tournamentId);
+    }
+
+    public boolean isOrganizerOfTournament(String email, Integer tournamentId) {
+        // Find UserId by email
+        Integer userId = userRepository.findUserByEmail(email).orElseThrow(() -> new InvalidRequestException("Organizer not found")).getId();
+
+        // Find User by userId and tournamentId
+        User user = userRepository.isOrganizerOfTournament(userId, tournamentId);
+
+        // If user is null -> user is not organizer of this tournament
+        return user != null;
+    }
+
+    public boolean isExistUser(String email) {
+        return userRepository.existsByEmailAndIsDeletedFalse(email);
     }
 }

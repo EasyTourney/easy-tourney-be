@@ -50,4 +50,7 @@ public class Tournament {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @Column(name = "description")
+    private String description;
 }

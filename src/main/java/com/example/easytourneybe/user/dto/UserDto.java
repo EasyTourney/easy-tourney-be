@@ -14,4 +14,14 @@ public class UserDto {
     private String lastName;
     private String email;
     private UserRole role;
+
+    public static UserDto toUserDto(User user) {
+        return UserDto.builder()
+            .id(user.getId())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
+            .email(user.getEmail())
+            .role(user.getRole())
+            .build();
+    }
 }

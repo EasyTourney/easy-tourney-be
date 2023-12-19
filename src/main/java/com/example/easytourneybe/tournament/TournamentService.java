@@ -1,18 +1,16 @@
 package com.example.easytourneybe.tournament;
 
-import com.example.easytourneybe.enums.tournament.TournamentStatus;
 import com.example.easytourneybe.enums.UserRole;
+import com.example.easytourneybe.enums.tournament.TournamentStatus;
 import com.example.easytourneybe.eventdate.EventDateService;
 import com.example.easytourneybe.model.ResponseObject;
 import com.example.easytourneybe.user.UserService;
-import com.example.easytourneybe.user.dto.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -60,5 +58,9 @@ public class TournamentService {
         } else {
             throw new NoSuchElementException("Tournament not found");
         }
+    }
+
+    public ResponseObject getTournamentToShowGeneral(Integer id) {
+        return tournamentRepository.findTournamentToShowGeneral(id);
     }
 }
