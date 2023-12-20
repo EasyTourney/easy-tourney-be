@@ -19,11 +19,14 @@ public class Team {
     @Column(name = "name")
     private String teamName;
     @Column(name = "tournament_id")
-    private Long tournamentId;
+    private Integer tournamentId;
     @Column(name = "score")
     private Integer score;
     @Column(name = "updatedAt")
     private LocalDateTime updatedAt;
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+    public void setTeamName(String teamName) {
+        this.teamName = (teamName != null) ? teamName.trim() : null;
+    }
 }

@@ -1,7 +1,10 @@
 package com.example.easytourneybe.team;
 
+import com.example.easytourneybe.category.Category;
 import com.example.easytourneybe.model.ResponseObject;
 import com.example.easytourneybe.team.dto.TeamPlayerDto;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +22,7 @@ public class TeamController {
     private TeamService TeamService;
     @GetMapping("/{id}/team")
     public ResponseEntity<ResponseObject> findAllTeamAndPlayer(
-            @PathVariable Long id ,
+            @PathVariable Integer id ,
             @RequestParam(defaultValue = SIZE) Integer size,
             @RequestParam(defaultValue = PAGE) Integer page
     ) {
@@ -31,6 +34,14 @@ public class TeamController {
         responseObject.setAdditionalData(java.util.Collections.singletonMap("totalTeamOfTournament", totalTeamRecords));
         return ResponseEntity.status(HttpStatus.OK).body(
                 responseObject
+        );
+    }
+    @PostMapping("/{id}/team")
+    public ResponseEntity<ResponseObject> createTeam(@Valid @RequestBody Team team,
+                                                     @PathVariable Integer id) {
+        Team temp = TeamService.createTeam(team.getTeamName().trim(), id);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                new ResponseObject(true, 1, temp)
         );
     }
 }

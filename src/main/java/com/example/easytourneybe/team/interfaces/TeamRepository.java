@@ -19,7 +19,9 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
             "WHERE team.tournamentId = :tournament_id " +
             "GROUP BY team.teamId, team.teamName " +
             "ORDER BY team.teamId ASC")
-    List<Object[]> getAllTeamAndPlayerCount(@Param("tournament_id") Long tournamentId, Pageable page);
+    List<Object[]> getAllTeamAndPlayerCount(@Param("tournament_id") Integer tournamentId, Pageable page);
     @Query("SELECT COUNT(team.teamId) FROM Team team WHERE team.tournamentId = :tournament_id")
-    Long getTotalRecordsForTournament(@Param("tournament_id") Long tournamentId);
+    Long getTotalRecordsForTournament(@Param("tournament_id") Integer tournamentId);
+    @Query("SELECT t FROM Team t WHERE LOWER(t.teamName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Team> findTeamsByName(@Param("keyword") String keyword);
 }

@@ -35,9 +35,4 @@ public class Player {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @ManyToOne
-    @JoinColumn(name = "team_id", referencedColumnName = "id", insertable = false, updatable = false)
-    private Team team;
-
 }
