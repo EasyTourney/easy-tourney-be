@@ -13,4 +13,8 @@ public class EventDateService {
     public List<EventDate> findAllByTournamentId(Integer tournamentId) {
         return eventDateRepository.findAllByTournamentId(tournamentId);
     };
+
+    public List<EventDate> saveAll(List<EventDate> eventDates) {
+        return eventDateRepository.saveAll(eventDates);
+    }
 }

@@ -53,4 +53,9 @@ public class Tournament {
 
     @Column(name = "description")
     private String description;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        isDeleted = false;
+    }
 }

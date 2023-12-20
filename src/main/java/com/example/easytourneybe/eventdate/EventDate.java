@@ -2,15 +2,19 @@ package com.example.easytourneybe.eventdate;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "event_date")
 public class EventDate {
     @Id
@@ -20,11 +24,14 @@ public class EventDate {
     @Column(name = "tournament_id")
     private Integer tournamentId;
 
-    @Column(name = "start_at")
-    private LocalDateTime startAt;
+    @Column(name = "date")
+    private LocalDate date;
 
-    @Column(name = "end_at")
-    private LocalDateTime endAt;
+    @Column(name = "start_time")
+    private LocalTime startTime;
+
+    @Column(name = "end_time")
+    private LocalTime endTime;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

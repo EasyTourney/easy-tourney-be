@@ -59,6 +59,7 @@ public class TournamentRepositoryCustomImpl implements TournamentRepositoryCusto
                     JOIN category c on t.category_id = c.category_id
                     WHERE t.tournament_id = :id AND t.is_deleted = false""";
 
+
     @Override
     public ResponseObject findAllByUserId(Integer userId, Integer page, Integer pageSize, String sortType, String field, TournamentStatus status, String search, Integer categoryId) {
         String userIdFilter = "true";
@@ -70,15 +71,15 @@ public class TournamentRepositoryCustomImpl implements TournamentRepositoryCusto
         String categoryIdFilter = "true";
         if (categoryId != null) categoryIdFilter = "t.category_id = " + categoryId;
         String sql = String.format(GET_TOURNAMENT_BY_USERID, userIdFilter, statusFilter, searchFilter, categoryIdFilter,
-                userIdFilter, statusFilter, searchFilter, categoryIdFilter,
-                field, sortType);
+                                                            userIdFilter, statusFilter, searchFilter, categoryIdFilter,
+                                                            field, sortType);
 
         List<Object[]> rows = entityManager.createNativeQuery(sql)
                 .setParameter("pageSize", pageSize)
                 .setParameter("off_set", page*pageSize)
                 .getResultList();
 
-        if (rows.size() == 0) return ResponseObject.builder().total(0).success(true).build();
+        if (rows.isEmpty()) return ResponseObject.builder().total(0).success(true).build();
 
         Long totalLong = (Long) rows.get(0)[8];
         String totalStr = String.valueOf(totalLong);

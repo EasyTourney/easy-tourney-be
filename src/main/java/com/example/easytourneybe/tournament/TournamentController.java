@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -35,9 +37,20 @@ public class TournamentController {
                 new ResponseObject(true, 1, deleteTournament));
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<ResponseObject> getTournamentGeneralInfo(@PathVariable Integer id) {
         ResponseObject tournamentResponse = tournamentService.getTournamentToShowGeneral(id);
         return ResponseEntity.status(HttpStatus.OK).body(tournamentResponse);
+    }
+
+    @PostMapping()
+    public ResponseEntity<?> createTournament(@RequestParam(name = "title", required = true) String title,
+                                    @RequestParam(name = "categoryId", required = true) Integer categoryId,
+                                    @RequestParam(name = "eventDates", required = false) List<LocalDate> eventDates) {
+        return ResponseEntity.ok()
+                .body(ResponseObject.builder().success(true).data(tournamentService.createTournament(title.trim(), categoryId, eventDates))
+                                                .total(1).build());
+
     }
 }
