@@ -23,7 +23,7 @@ public class TournamentController {
                                     @RequestParam(name = "sortType", required = false, defaultValue = "DESC") String sortType,
                                     @RequestParam(name = "filterStatus", required = false) TournamentStatus status,
                                     @RequestParam(name = "keyword", required = false, defaultValue = "") String search,
-                                    @RequestParam(name = "categoryId", required = false) Integer categoryId
+                                    @RequestParam(name = "filterCategory", required = false) Integer categoryId
                                     ) {
 
         return ResponseEntity.ok(tournamentService.getAll(page-1, pageSize, field, sortType.toUpperCase(), status, search.trim(), categoryId));
