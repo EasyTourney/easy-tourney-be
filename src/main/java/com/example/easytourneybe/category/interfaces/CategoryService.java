@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface CategoryService {
     Category createCategory(String name);
 
-    boolean hasExistCategoryName(String categoryName);
+    Category hasExistCategoryName(String categoryName);
 
     Optional<Category> findCategoryById(Long id);
 

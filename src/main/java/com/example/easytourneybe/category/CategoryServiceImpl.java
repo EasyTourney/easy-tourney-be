@@ -19,7 +19,7 @@ public class CategoryServiceImpl implements com.example.easytourneybe.category.i
 
     @Override
     public Category createCategory(String categoryName) {
-        if (hasExistCategoryName(categoryName.trim())) {
+        if (hasExistCategoryName(categoryName.trim())!=null) {
             throw new InvalidRequestException("Category name has already existed");
         }
 
@@ -32,8 +32,8 @@ public class CategoryServiceImpl implements com.example.easytourneybe.category.i
 
 
     @Override
-    public boolean hasExistCategoryName(String categoryName) {
-        return categoryRepository.findCategoriesByName(categoryName) != null;
+    public Category hasExistCategoryName(String categoryName) {
+        return categoryRepository.findCategoriesByName(categoryName) ;
     }
 
     @Override
@@ -90,7 +90,7 @@ public class CategoryServiceImpl implements com.example.easytourneybe.category.i
     public Optional<Category> updateCategory(Long id, String categoryName) {
         Optional<Category> categoryOptional = categoryRepository.findCategoryById(id);
 
-        if(hasExistCategoryName(categoryName)){
+        if(hasExistCategoryName(categoryName)!=null&& !Objects.equals(hasExistCategoryName(categoryName).getCategoryId(), id)){
             throw new InvalidRequestException("Category name has already exist");
         }
 
@@ -109,6 +109,6 @@ public class CategoryServiceImpl implements com.example.easytourneybe.category.i
     }
 
     public List<Category> findAllCategories() {
-        return categoryRepository.findAllByIsDeletedFalse();
+        return categoryRepository.getAllCategory();
     }
 }

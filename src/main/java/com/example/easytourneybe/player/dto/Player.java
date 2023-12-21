@@ -1,9 +1,11 @@
-package com.example.easytourneybe.team;
+package com.example.easytourneybe.player.dto;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -35,4 +37,15 @@ public class Player {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public void setDateOfBirth (String dateOfBirth) {
+        if (dateOfBirth == null) {
+            return;
+        }
+        try {
+            this.dateOfBirth = LocalDate.parse(dateOfBirth.trim());
+        } catch (Exception e) {
+            throw new HttpMessageNotReadableException("Date of birth must be valid");
+        }
+    }
 }

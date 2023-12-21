@@ -3,6 +3,7 @@ import com.example.easytourneybe.enums.UserRole;
 import com.example.easytourneybe.enums.tournament.TournamentStatus;
 import com.example.easytourneybe.eventdate.EventDateService;
 import com.example.easytourneybe.model.ResponseObject;
+import com.example.easytourneybe.team.TeamService;
 import com.example.easytourneybe.user.UserService;
 import com.example.easytourneybe.category.Category;
 import com.example.easytourneybe.category.interfaces.CategoryService;
@@ -30,6 +31,9 @@ public class TournamentService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    TeamService teamService ;
 
     @Autowired
     private EventDateService eventDateService;
@@ -69,6 +73,7 @@ public class TournamentService {
             tournament.setIsDeleted(true);
             tournament.setDeletedAt(LocalDateTime.now());
             tournament.setStatus(TournamentStatus.DELETED);
+            teamService.deleteTeamByTournamentId(id);
             tournamentRepository.save(tournament);
             return Optional.of(tournament);
         } else {

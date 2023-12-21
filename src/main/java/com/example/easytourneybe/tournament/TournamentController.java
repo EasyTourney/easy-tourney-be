@@ -31,12 +31,11 @@ public class TournamentController {
         return ResponseEntity.ok(tournamentService.getAll(page-1, pageSize, field, sortType.toUpperCase(), status, search.trim(), categoryId));
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseObject> delete(@PathVariable Integer id) {
+    public ResponseEntity<ResponseObject> deleteTournament(@PathVariable Integer id) {
         Optional<Tournament> deleteTournament = tournamentService.deleteTournament(id);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject(true, 1, deleteTournament));
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseObject> getTournamentGeneralInfo(@PathVariable Integer id) {

@@ -47,7 +47,7 @@ public class TeamService {
 
         if (teamOptional.isPresent()) {
             Team team = teamOptional.get();
-            team.setTeamName(teamName);
+            team.setTeamName(teamName.trim());
             team.setUpdatedAt(LocalDateTime.now());
             team.setTournamentId(tournamentId);
             teamRepository.save(team);
@@ -70,5 +70,10 @@ public class TeamService {
     }
         public long getTotalRecordsForTournament(Integer id) {
             return teamRepository.getTotalRecordsForTournament(id);
+    }
+    public void deleteTeamByTournamentId(Integer tournamentId) {
+
+        List<Team> foundTeam = teamRepository.findTeamByTournamentId(tournamentId);
+        teamRepository.deleteAll(foundTeam);
     }
 }
