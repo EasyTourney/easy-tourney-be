@@ -28,7 +28,6 @@ public class TeamService {
         return !teamRepository.findTeamsByName(tournamentId, teamName.trim()).isEmpty();
     }
     public Team createTeam (String teamName, Integer tournamentId) {
-
         if (hasExistTeamName(tournamentId, teamName.trim())) {
             throw new InvalidRequestException("Team name has already existed");
         }
@@ -44,7 +43,6 @@ public class TeamService {
         if(hasExistTeamName(tournamentId, teamName.trim())){
             throw new InvalidRequestException("Team name has already exist");
         }
-
         if (teamOptional.isPresent()) {
             Team team = teamOptional.get();
             team.setTeamName(teamName.trim());
