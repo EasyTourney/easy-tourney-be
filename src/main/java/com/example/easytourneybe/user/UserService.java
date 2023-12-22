@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -156,6 +157,13 @@ public class UserService implements UserDetailsService {
 
     public boolean isExistUser(String email) {
         return userRepository.existsByEmailAndIsDeletedFalse(email);
+    }
+
+    public List<UserDto> findAllOrganizer() {
+        List<User> users = userRepository.findAllByIsDeleted(false);
+        return users.stream()
+                .filter(user -> user.getRole().equals(UserRole.ORGANIZER))
+                .map(UserDto::toUserDto).collect(Collectors.toList());
     }
 
     public User getUserById(Integer id) {

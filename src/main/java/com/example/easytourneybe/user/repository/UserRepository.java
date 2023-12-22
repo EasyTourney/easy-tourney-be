@@ -58,6 +58,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             """)
     User isOrganizerOfTournament(Integer userId, Integer tournamentId);
 
+    List<User> findAllByIsDeleted(Boolean isDeleted);
+
     @Query("""
         SELECT u
         FROM User u

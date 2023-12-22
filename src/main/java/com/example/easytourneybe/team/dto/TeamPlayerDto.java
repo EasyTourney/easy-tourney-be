@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TeamPlayerDto {
-    private Long team_id;
-    private String team_name;
-    private Long player_count;
+    private Long teamId;
+    private String teamName;
+    private Long playerCount;
 }

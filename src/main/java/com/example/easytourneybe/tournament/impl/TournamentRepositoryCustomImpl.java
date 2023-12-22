@@ -93,7 +93,7 @@ public class TournamentRepositoryCustomImpl implements TournamentRepositoryCusto
                     return TournamentDto.builder()
                             .id(tournamentId)
                             .title((String) row[1])
-                            .category(CategoryDto.builder().id((Long) row[2]).name((String) row[3]).build())
+                            .category(CategoryDto.builder().id((Long) row[2]).categoryName((String) row[3]).build())
                             .createdAt(timestamp.toLocalDateTime())
                             .status(TournamentStatus.valueOf((String) row[5]))
                             .matchDuration((Integer) row[6])
@@ -141,7 +141,7 @@ public class TournamentRepositoryCustomImpl implements TournamentRepositoryCusto
                 .title((String) row[1])
                 .description((String) row[2])
                 .status(TournamentStatus.valueOf((String) row[3]))
-                .category(CategoryDto.builder().id((Long) row[4]).name((String) row[5]).build())
+                .category(CategoryDto.builder().id((Long) row[4]).categoryName((String) row[5]).build())
                 .organizers(userDTOs)
                 .eventDates(eventDates)
                 .build();

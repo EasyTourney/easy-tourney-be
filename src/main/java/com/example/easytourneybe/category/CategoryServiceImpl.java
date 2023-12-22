@@ -119,7 +119,7 @@ public class CategoryServiceImpl implements com.example.easytourneybe.category.i
             Category category = categoryOptional.get();
             return CategoryDto.builder()
                     .id(category.getCategoryId())
-                    .name(category.getCategoryName())
+                    .categoryName(category.getCategoryName())
                     .build();
         } else {
             throw new NoSuchElementException("Category not found");

@@ -4,6 +4,7 @@ import com.example.easytourneybe.model.ResponseObject;
 import com.example.easytourneybe.user.dto.OrganizerTableDto;
 import com.example.easytourneybe.user.dto.User;
 import com.example.easytourneybe.user.dto.OrganizerUpSertDto;
+import com.example.easytourneybe.user.dto.UserDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,5 +108,16 @@ public class UserController {
                 .success(true).data(result).build());
     }
 
+    @GetMapping("getAllOrganizer")
+    public ResponseEntity<?> getAllOrganizer() {
+        List<UserDto> result = userService.findAllOrganizer();
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .data(result)
+                        .success(true)
+                        .total(result.size())
+                        .build()
+        );
+    }
 
 }
