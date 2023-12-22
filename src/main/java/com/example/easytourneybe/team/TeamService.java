@@ -4,6 +4,7 @@ import com.example.easytourneybe.exceptions.InvalidRequestException;
 import com.example.easytourneybe.team.dto.TeamPlayerDto;
 import com.example.easytourneybe.team.interfaces.TeamRepository;
 import jakarta.transaction.Transactional;
+import com.example.easytourneybe.tournament.TournamentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,8 +17,9 @@ import java.util.stream.Collectors;
 public class TeamService {
     @Autowired
     private TeamRepository teamRepository;
-
-       public List<TeamPlayerDto> getAllTeamAndPlayerCount(Integer id, Integer page, Integer size) {
+    @Autowired
+    private TournamentRepository tournamentRepository;
+    public List<TeamPlayerDto> getAllTeamAndPlayerCount(Integer id, Integer page, Integer size) {
             Pageable pageable= PageRequest.of(page,size);
            return teamRepository.getAllTeamAndPlayerCount(id, pageable).stream()
                    .map(teamData -> new TeamPlayerDto((Long) teamData[0], (String) teamData[1], (Long) teamData[2]))
@@ -28,6 +30,9 @@ public class TeamService {
         return !teamRepository.findTeamsByName(tournamentId, teamName.trim()).isEmpty();
     }
     public Team createTeam (String teamName, Integer tournamentId) {
+        if(tournamentRepository.findTournamentById(tournamentId).isEmpty()) {
+            throw new InvalidRequestException("Tournament has been deleted or discarded");
+        }
         if (hasExistTeamName(tournamentId, teamName.trim())) {
             throw new InvalidRequestException("Team name has already existed");
         }
@@ -56,13 +61,12 @@ public class TeamService {
     @Transactional
     public Optional<Team> deleteTeam(Integer tournamentId, Integer id) {
         Optional<Team> teamOptional = teamRepository.findTeamById(tournamentId,id);
-
         if (teamOptional.isPresent()) {
             Team team = teamOptional.get();
             teamRepository.deleteByTournamentIdAndTeamId(tournamentId, id);
             return Optional.of(team);
         } else {
-            throw new NoSuchElementException("Category not found");
+            throw new NoSuchElementException("Not found team or team belonging to a tournament that has been deleted or discarded, please check again");
         }
     }
         public long getTotalRecordsForTournament(Integer id) {

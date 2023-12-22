@@ -19,6 +19,9 @@ public interface TournamentRepository extends JpaRepository<Tournament, Integer>
         Page<Tournament> findAllByTitleContaining(String infix, Pageable pageable);
         @Query("SELECT c FROM tournament c WHERE c.id = :id AND c.isDeleted = false")
         Optional<Tournament> findTournamentByIdAndIsDeletedFalse(@Param("id") Integer id);
+        @Query("SELECT t FROM tournament t WHERE t.id = :tournamentId AND t.isDeleted = false AND t.status != 'DISCARDED'")
+        Optional<Tournament> findTournamentById(@Param("tournamentId") Integer tournamentId);
+
 
 }
 
