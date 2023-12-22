@@ -4,7 +4,9 @@ package com.example.easytourneybe.user.repository;
 import com.example.easytourneybe.user.dto.OrganizerInGeneralDto;
 import com.example.easytourneybe.user.dto.User;
 import com.example.easytourneybe.user.dto.UserDto;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -55,4 +57,11 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             WHERE ot.tournamentId = :tournamentId AND ot.userId = :userId AND u.isDeleted = false
             """)
     User isOrganizerOfTournament(Integer userId, Integer tournamentId);
+
+    @Query("""
+        SELECT u
+        FROM User u
+        WHERE u.id = :id AND u.isDeleted = false
+    """)
+    Optional<User> findUserById(Integer id);
 }

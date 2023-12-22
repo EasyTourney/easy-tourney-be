@@ -6,4 +6,9 @@ public class DateValidatorUtils {
         LocalDate today = LocalDate.now();
         return inputDate.isBefore(today);
     }
+
+    public static boolean isAfterToday(LocalDate inputDate) {
+        LocalDate today = LocalDate.now();
+        return inputDate.isAfter(today);
+    }
 }

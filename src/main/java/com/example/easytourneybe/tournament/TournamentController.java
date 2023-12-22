@@ -2,6 +2,7 @@ package com.example.easytourneybe.tournament;
 
 import com.example.easytourneybe.enums.tournament.TournamentStatus;
 import com.example.easytourneybe.model.ResponseObject;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,5 +52,17 @@ public class TournamentController {
                 .body(ResponseObject.builder().success(true).data(tournamentService.createTournament(title.trim(), categoryId, eventDates))
                                                 .total(1).build());
 
+    }
+
+    @PutMapping("/{id}/detail")
+    public ResponseEntity<ResponseObject> updateTournament(@PathVariable Integer id,
+                                                           @Valid @RequestBody TournamentUpdateDto tournamentUpdateDto) {
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ResponseObject.builder()
+                        .data(tournamentService.updateTournament(id, tournamentUpdateDto))
+                        .success(true)
+                        .total(1)
+                        .build()
+        );
     }
 }

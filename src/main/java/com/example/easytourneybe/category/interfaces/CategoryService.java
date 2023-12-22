@@ -1,7 +1,9 @@
 package com.example.easytourneybe.category.interfaces;
 
 import com.example.easytourneybe.category.Category;
+import com.example.easytourneybe.category.CategoryDto;
 import org.springframework.data.domain.Sort;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -23,4 +25,6 @@ public interface CategoryService {
     Sort getSorting(String sortType, String sortValue);
 
     List<Category> findAllCategories();
+
+    CategoryDto findCategoryDtoById(Integer categoryId);
 }

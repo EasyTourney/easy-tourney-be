@@ -157,4 +157,8 @@ public class UserService implements UserDetailsService {
     public boolean isExistUser(String email) {
         return userRepository.existsByEmailAndIsDeletedFalse(email);
     }
+
+    public User getUserById(Integer id) {
+        return userRepository.findUserById(id).orElseThrow(() -> new InvalidRequestException("User not found"));
+    }
 }

@@ -111,4 +111,18 @@ public class CategoryServiceImpl implements com.example.easytourneybe.category.i
     public List<Category> findAllCategories() {
         return categoryRepository.getAllCategory();
     }
+
+    @Override
+    public CategoryDto findCategoryDtoById(Integer categoryId) {
+        Optional<Category> categoryOptional = categoryRepository.findCategoryById(Long.valueOf(categoryId));
+        if (categoryOptional.isPresent()) {
+            Category category = categoryOptional.get();
+            return CategoryDto.builder()
+                    .id(category.getCategoryId())
+                    .name(category.getCategoryName())
+                    .build();
+        } else {
+            throw new NoSuchElementException("Category not found");
+        }
+    }
 }

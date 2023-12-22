@@ -58,4 +58,12 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject(true, 1, deleteTeam));
     }
+
+    @GetMapping("/team/{id}")
+    public ResponseEntity<ResponseObject> findTeamById(@PathVariable Integer tournament_id, @PathVariable Integer id) {
+        Team team = teamService.findTeamById(tournament_id, id);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject(true, 1, team)
+        );
+    }
 }

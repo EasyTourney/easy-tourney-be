@@ -17,4 +17,16 @@ public class EventDateService {
     public List<EventDate> saveAll(List<EventDate> eventDates) {
         return eventDateRepository.saveAll(eventDates);
     }
+
+    public void deleteAllByTournamentId(Integer tournamentId) {
+        eventDateRepository.deleteAllByTournamentId(tournamentId);
+    }
+
+    public void deleteByEventDateId(Integer eventDateId) {
+        eventDateRepository.deleteByEventDateId(eventDateId);
+    }
+
+    public void createEventDate(EventDate eventDate) {
+        eventDateRepository.save(eventDate);
+    }
 }

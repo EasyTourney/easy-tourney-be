@@ -74,4 +74,9 @@ public class TeamService {
         List<Team> foundTeam = teamRepository.findTeamByTournamentId(tournamentId);
         teamRepository.deleteAll(foundTeam);
     }
+
+    public Team findTeamById(Integer tournamentId, Integer id) {
+           Team team = teamRepository.findTeamById(tournamentId, id).orElseThrow(() -> new NoSuchElementException("Team not found"));
+          return team;
+    }
 }
