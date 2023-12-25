@@ -84,4 +84,12 @@ public class PlayerService {
         playerRepository.delete(existingPlayer);
         return existingPlayer;
     }
+    public Player getPlayerByPlayerID(Long teamId,Long playerId) {
+        CheckTeamID(teamId);
+        Player player= playerRepository.findByPlayerIdAndTeamId(playerId, teamId);
+        if (player==null) {
+            throw new NoSuchElementException("Player not found");
+        }
+        return player;
+    }
 }

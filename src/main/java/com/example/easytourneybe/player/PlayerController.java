@@ -31,6 +31,19 @@ public class PlayerController {
                 responseObject
         );
     }
+    @GetMapping("/{playerID}")
+    public ResponseEntity<ResponseObject> getPlayerByPlayerID(
+            @PathVariable Long teamID,
+            @PathVariable Long playerID
+    ) {
+        Player player = playerService.getPlayerByPlayerID(teamID,playerID);
+        ResponseObject responseObject = new ResponseObject(
+                true, 1, player
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(
+                responseObject
+        );
+    }
     @PostMapping("")
     public ResponseEntity<ResponseObject> createPlayer(
             @PathVariable Long teamID,
