@@ -19,6 +19,7 @@ import java.time.LocalTime;
 public class EventDate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
 
     @Column(name = "tournament_id")

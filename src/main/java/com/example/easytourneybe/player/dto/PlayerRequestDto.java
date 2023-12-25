@@ -4,11 +4,13 @@ import com.example.easytourneybe.util.RegexpUtils;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlayerRequestDto {
@@ -19,4 +21,7 @@ public class PlayerRequestDto {
     private String dateOfBirth;
     @Pattern(regexp = RegexpUtils.PHONE_NUMBER_REGEXP, message = "Phone number must be valid")
     private String phone;
+    public void setPhone(String phone) {
+        this.phone = (phone != null) ? phone.trim() : null;
+    }
 }

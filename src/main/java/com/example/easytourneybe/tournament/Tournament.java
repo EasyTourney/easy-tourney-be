@@ -41,6 +41,9 @@ public class Tournament {
     @Column(name = "match_duration")
     private Integer matchDuration;
 
+    @Column(name = "time_between")
+    private Integer timeBetween;
+
     @Column(name = "format")
     @Enumerated(EnumType.STRING)
     private TournamentFormat format;

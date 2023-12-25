@@ -4,10 +4,13 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+
 
 @Repository
 public interface EventDateRepository extends JpaRepository<EventDate, Integer> {
@@ -25,4 +28,8 @@ public interface EventDateRepository extends JpaRepository<EventDate, Integer> {
     @Transactional
     @Query(value = "DELETE FROM event_date e WHERE e.id = :eventDateId", nativeQuery = true)
     void deleteByEventDateId(Integer eventDateId);
+
+
+
+    Optional<EventDate> findById(Integer eventDateId);
 }

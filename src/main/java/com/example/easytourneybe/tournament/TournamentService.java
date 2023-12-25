@@ -264,4 +264,8 @@ public class TournamentService {
                 .organizers(userService.findOrganizerInGeneral(tournamentId))
                 .build();
     }
+
+    public Optional<Tournament> findById(Integer id){
+        return tournamentRepository.findById(id);
+    }
 }

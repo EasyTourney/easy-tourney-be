@@ -1,13 +1,13 @@
 package com.example.easytourneybe.match;
 
 import com.example.easytourneybe.model.ResponseObject;
-import com.example.easytourneybe.player.dto.Player;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 
 @RestController
 @CrossOrigin
@@ -39,5 +39,6 @@ public class MatchController {
         );
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
+
 
 }

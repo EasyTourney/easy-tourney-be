@@ -49,7 +49,7 @@ public class PlayerService {
         CheckTeamID(teamId);
         Player newPlayer = new Player();
         newPlayer.setTeamId(teamId);
-        newPlayer.setPlayerName(playerName);
+        newPlayer.setPlayerName(playerName.trim());
         newPlayer.setDateOfBirth(dob);
         if (dob != null
                 && !DateValidatorUtils.isBeforeToday(LocalDate.parse(dob.trim()))) {
@@ -65,7 +65,7 @@ public class PlayerService {
         Player existingPlayer = playerRepository.findById(playerId)
                 .orElseThrow(() -> new NoSuchElementException("Player not found"));
         CheckTeamHasPlayer(teamId, playerId);
-        existingPlayer.setPlayerName(playerName);
+        existingPlayer.setPlayerName(playerName.trim());
         existingPlayer.setDateOfBirth(dob);
         if (dob != null
                 && !DateValidatorUtils.isBeforeToday(LocalDate.parse(dob.trim()))) {

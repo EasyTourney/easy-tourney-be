@@ -82,4 +82,9 @@ public class TeamService {
            Team team = teamRepository.findTeamById(tournamentId, id).orElseThrow(() -> new NoSuchElementException("Team not found"));
           return team;
     }
+
+    public List<Team> getAllTeamByTournamentId(Integer idTournament){return teamRepository.findTeamByTournamentId(idTournament);}
+    public Team getTeamById(Long id) {
+        return teamRepository.getTeamByTeamId(id);
+    }
 }

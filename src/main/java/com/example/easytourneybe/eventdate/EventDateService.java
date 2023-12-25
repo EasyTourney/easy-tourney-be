@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+
 
 @Service
 public class EventDateService {
@@ -14,8 +16,8 @@ public class EventDateService {
         return eventDateRepository.findAllByTournamentId(tournamentId);
     };
 
-    public List<EventDate> saveAll(List<EventDate> eventDates) {
-        return eventDateRepository.saveAll(eventDates);
+    public void saveAll(List<EventDate> eventDates) {
+         eventDateRepository.saveAll(eventDates);
     }
 
     public void deleteAllByTournamentId(Integer tournamentId) {
@@ -28,5 +30,9 @@ public class EventDateService {
 
     public void createEventDate(EventDate eventDate) {
         eventDateRepository.save(eventDate);
+    }
+
+    public Optional<EventDate> findByEventDateId(Integer eventDateId){
+        return eventDateRepository.findById(eventDateId);
     }
 }

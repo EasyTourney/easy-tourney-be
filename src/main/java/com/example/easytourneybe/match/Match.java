@@ -1,5 +1,6 @@
 package com.example.easytourneybe.match;
 
+import com.example.easytourneybe.enums.match.TypeMatch;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,17 +14,18 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="match")
+@Table(name = "match")
 public class Match {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "id")
+    private Long id;
 
     @Column(name = "team_one_id")
-    private Integer teamOneId;
+    private Long teamOneId;
 
     @Column(name = "team_two_id")
-    private Integer teamTwoId;
+    private Long teamTwoId;
 
     @Column(name = "team_one_result")
     private Integer teamOneResult;
@@ -37,6 +39,16 @@ public class Match {
     @Column(name = "end_time")
     private LocalTime endTime;
 
+    @Column(name = "duration")
+    private Integer matchDuration;
+
     @Column(name = "event_date_id")
     private Integer eventDateId;
+
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "type", columnDefinition = "types")
+    @Enumerated(EnumType.STRING)
+    private TypeMatch type;
 }
