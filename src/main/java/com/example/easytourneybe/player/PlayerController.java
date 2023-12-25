@@ -36,7 +36,7 @@ public class PlayerController {
             @PathVariable Long teamID,
            @Valid @RequestBody PlayerRequestDto player
     ) {
-        Player newPlayer=playerService.createPlayer(teamID, player.getPlayerName(), player.getDob(), player.getPhoneNumber());
+        Player newPlayer=playerService.createPlayer(teamID, player.getPlayerName(), player.getDateOfBirth(), player.getPhone());
         ResponseObject responseObject = new ResponseObject(
                 true, 1, newPlayer
         );
@@ -49,7 +49,7 @@ public class PlayerController {
             @PathVariable Long playerID,
             @Valid @RequestBody PlayerRequestDto player
     ) {
-        Player updatePlayer=playerService.updatePlayer(teamID,playerID, player.getPlayerName(), player.getDob(), player.getPhoneNumber());
+        Player updatePlayer=playerService.updatePlayer(teamID,playerID, player.getPlayerName().trim(), player.getDateOfBirth(), player.getPhone().trim());
         ResponseObject responseObject = new ResponseObject(
                 true, 1, updatePlayer
         );

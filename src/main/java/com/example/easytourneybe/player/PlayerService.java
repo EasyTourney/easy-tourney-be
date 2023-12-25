@@ -20,7 +20,6 @@ public class PlayerService {
     private PlayerRepository playerRepository;
     @Autowired
     private TeamRepository teamRepository;
-    private final CommonValidation commonValidation=new CommonValidation();
 
     public void CheckTeamID(Long teamId) {
         List<Long> listTeamId= teamRepository.getAllTeamID();

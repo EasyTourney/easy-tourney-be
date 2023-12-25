@@ -16,7 +16,7 @@ public class PlayerRequestDto {
     @Pattern(regexp = RegexpUtils.NAME_REGEXP, message = "Player name must be alphabetic")
     @Length(max = 30, message = "Player name must be maximum 30 characters")
     private String playerName;
-    private String dob;
+    private String dateOfBirth;
     @Pattern(regexp = RegexpUtils.PHONE_NUMBER_REGEXP, message = "Phone number must be valid")
-    private String phoneNumber;
+    private String phone;
 }
