@@ -101,11 +101,12 @@ public class TournamentService {
     }
 
     @Transactional
-    public Tournament createTournament(String title, Integer categoryId, List<LocalDate> eventDates) {
+    public Tournament createTournament(String title, Integer categoryId, List<LocalDate> eventDates, String desc) {
         Optional<Category> categoryOpt = categoryService.findCategoryById(Long.valueOf(categoryId));
         if (!categoryOpt.isPresent() || categoryOpt.get().isDeleted()) throw  new NoSuchElementException("category not found with id: " + categoryId);
         Integer defaultMatchDuration = 60;
         Tournament tournament = Tournament.builder().title(title).categoryId(categoryId)
+                .description(desc)
                 .format(TournamentFormat.ROUND_ROBIN)
                 .status(TournamentStatus.NEED_INFORMATION)
                 .matchDuration(defaultMatchDuration)

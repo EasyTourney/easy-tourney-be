@@ -45,13 +45,11 @@ public class TournamentController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> createTournament(@RequestParam(name = "title", required = true) String title,
-                                    @RequestParam(name = "categoryId", required = true) Integer categoryId,
-                                    @RequestParam(name = "eventDates", required = false) List<LocalDate> eventDates) {
+    public ResponseEntity<?> createTournament(@RequestBody CreateTournamentRequest request) {
         return ResponseEntity.ok()
-                .body(ResponseObject.builder().success(true).data(tournamentService.createTournament(title.trim(), categoryId, eventDates))
-                                                .total(1).build());
-
+                .body(ResponseObject.builder().success(true).data(
+                        tournamentService.createTournament(request.getTitle(), request.getCategoryId(), request.getEventDates(), request.getDescription())
+                        ).total(1).build());
     }
 
     @PutMapping("/{id}/detail")
