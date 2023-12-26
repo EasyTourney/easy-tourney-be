@@ -19,8 +19,8 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long teamId;
-    @Pattern(regexp = RegexpUtils.CATEGORY_REGEXP, message = "Category name must be alphanumeric")
-    @Length(min = 2, max = 30, message = "Category name must be between 2 and 30 characters")
+    @Pattern(regexp = RegexpUtils.CATEGORY_REGEXP, message = "Team name must be alphanumeric")
+    @Length(min = 1, max = 30, message = "Team name must be between 1 and 30 characters")
     @Column(name = "name")
     private String teamName;
     @Column(name = "tournament_id")

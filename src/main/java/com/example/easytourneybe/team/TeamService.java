@@ -44,15 +44,18 @@ public class TeamService {
     }
     public Optional<Team> updateTeam(Integer tournamentId, Integer id, String teamName) {
         Optional<Team> teamOptional = teamRepository.findTeamById(tournamentId, id);
-        if(hasExistTeamName(tournamentId, teamName.trim())){
-            throw new InvalidRequestException("Team name has already exist");
-        }
         if (teamOptional.isPresent()) {
             Team team = teamOptional.get();
+            if (!team.getTeamName().equals(teamName.trim())) {
+                if (hasExistTeamName(tournamentId, teamName.trim())) {
+                    throw new InvalidRequestException("Team name has already exist");
+                }
+            }
             team.setTeamName(teamName.trim());
             team.setUpdatedAt(LocalDateTime.now());
             team.setTournamentId(tournamentId);
             teamRepository.save(team);
+
             return Optional.of(team);
         } else {
             throw new NoSuchElementException("Not found team or team belonging to a tournament that has been deleted or discarded, please check again");
