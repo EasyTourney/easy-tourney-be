@@ -4,7 +4,7 @@ import com.example.easytourneybe.category.CategoryDto;
 import com.example.easytourneybe.enums.UserRole;
 import com.example.easytourneybe.enums.tournament.TournamentFormat;
 import com.example.easytourneybe.enums.tournament.TournamentStatus;
-import com.example.easytourneybe.eventdate.EventDate;
+import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.eventdate.EventDateService;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
 import com.example.easytourneybe.model.ResponseObject;

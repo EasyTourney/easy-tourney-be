@@ -1,6 +1,6 @@
 package com.example.easytourneybe.util;
 
-import com.example.easytourneybe.eventdate.EventDate;
+import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.generation.GenerationDto;
 import com.example.easytourneybe.match.Match;
 import com.example.easytourneybe.match.MatchDto;

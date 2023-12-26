@@ -1,6 +1,6 @@
 package com.example.easytourneybe.generation;
 
-import com.example.easytourneybe.eventdate.EventDate;
+import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.eventdate.EventDateService;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
 import com.example.easytourneybe.generation.interfaces.IGenerationService;

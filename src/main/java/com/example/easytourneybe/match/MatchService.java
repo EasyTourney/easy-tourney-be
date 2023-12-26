@@ -1,7 +1,7 @@
 package com.example.easytourneybe.match;
 
 import com.example.easytourneybe.enums.match.TypeMatch;
-import com.example.easytourneybe.eventdate.EventDate;
+import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
 import com.example.easytourneybe.match.interfaces.IMatchRepository;
 import com.example.easytourneybe.match.interfaces.IMatchService;

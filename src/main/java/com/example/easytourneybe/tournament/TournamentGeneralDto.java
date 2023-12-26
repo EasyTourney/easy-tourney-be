@@ -2,7 +2,7 @@ package com.example.easytourneybe.tournament;
 
 import com.example.easytourneybe.category.CategoryDto;
 import com.example.easytourneybe.enums.tournament.TournamentStatus;
-import com.example.easytourneybe.eventdate.EventDate;
+import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.user.dto.OrganizerInGeneralDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

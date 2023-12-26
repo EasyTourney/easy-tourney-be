@@ -1,10 +1,11 @@
-package com.example.easytourneybe.eventdate;
+package com.example.easytourneybe.eventdate.dto;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
