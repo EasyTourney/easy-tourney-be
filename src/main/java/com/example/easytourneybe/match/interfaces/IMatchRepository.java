@@ -69,4 +69,6 @@ public interface IMatchRepository extends JpaRepository<Match,Integer> {
     boolean isMatchInTournament(Integer tournamentId, Integer matchID);
 
 
+    List<Match> findAllByEventDateId(Integer eventDateId);
+
 }

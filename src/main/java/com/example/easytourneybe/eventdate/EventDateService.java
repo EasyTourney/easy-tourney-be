@@ -12,9 +12,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-
 import static com.example.easytourneybe.util.TimeValidateUtils.ParseStringToTime;
-
 
 @Service
 public class EventDateService {
@@ -37,11 +35,8 @@ public class EventDateService {
         eventDateRepository.deleteByEventDateId(eventDateId);
     }
 
-    public void createEventDate(EventDate eventDate) {
-        eventDateRepository.save(eventDate);
-    }
 
-    public Optional<EventDate> findByEventDateId(Integer eventDateId){
+    public Optional<EventDate> findByEventDateId(Integer eventDateId) {
         return eventDateRepository.findById(eventDateId);
     }
 

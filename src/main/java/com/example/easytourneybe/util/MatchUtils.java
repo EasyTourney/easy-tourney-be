@@ -1,6 +1,7 @@
 package com.example.easytourneybe.util;
 
 import com.example.easytourneybe.eventdate.dto.EventDate;
+import com.example.easytourneybe.enums.match.TypeMatch;
 import com.example.easytourneybe.generation.GenerationDto;
 import com.example.easytourneybe.match.Match;
 import com.example.easytourneybe.match.MatchDto;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalTime;
 import java.util.*;
 
+import java.util.stream.Collectors;
 
 @Component
 public class MatchUtils {
@@ -35,12 +37,15 @@ public class MatchUtils {
     public MatchDto convertMatchtoMatchDTO(Match match) {
         MatchDto matchDTO = new MatchDto();
         matchDTO.setId(match.getId());
-        matchDTO.setTeamOne(teamService.getTeamById(match.getTeamOneId()));
-        matchDTO.setTeamTwo(teamService.getTeamById(match.getTeamTwoId()));
+        if (match.getType().equals(TypeMatch.MATCH)) {
+            matchDTO.setTeamOne(teamService.getTeamById(match.getTeamOneId()));
+            matchDTO.setTeamTwo(teamService.getTeamById(match.getTeamTwoId()));
+        }
         matchDTO.setStartTime(match.getStartTime());
         matchDTO.setEndTime(match.getEndTime());
         matchDTO.setEventDateId(match.getEventDateId());
         matchDTO.setType(match.getType());
+        matchDTO.setTitle(match.getTitle());
         return matchDTO;
     }
 
@@ -86,6 +91,10 @@ public class MatchUtils {
         return matches.stream()
                 .map(this::convertMatchtoMatchDTO)
                 .toList();
+    }
+
+    public List<MatchDto> convertMatchToMatchDto(List<Match> matches) {
+        return matches.stream().map(this::convertMatchtoMatchDTO).sorted(Comparator.comparing(MatchDto::getStartTime)).collect(Collectors.toList());
     }
 
 

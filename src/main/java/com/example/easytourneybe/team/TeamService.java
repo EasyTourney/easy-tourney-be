@@ -31,7 +31,7 @@ public class TeamService {
     }
     public Team createTeam (String teamName, Integer tournamentId) {
         if(tournamentRepository.findTournamentById(tournamentId).isEmpty()) {
-            throw new InvalidRequestException("Tournament has been deleted or discarded");
+            throw new InvalidRequestException("Tournament has been deleted or discarded or finished");
         }
         if (hasExistTeamName(tournamentId, teamName.trim())) {
             throw new InvalidRequestException("Team name has already existed");
