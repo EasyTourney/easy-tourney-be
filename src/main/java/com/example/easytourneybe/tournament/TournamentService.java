@@ -28,6 +28,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.example.easytourneybe.util.TournamentStatusPermission.*;
 
@@ -101,7 +102,13 @@ public class TournamentService {
     }
 
     @Transactional
-    public Tournament createTournament(String title, Integer categoryId, List<LocalDate> eventDates, String desc) {
+    public Tournament createTournament(String title, Integer categoryId, Set<LocalDate> eventDates, String desc) {
+        if (eventDates.isEmpty())
+            throw new InvalidRequestException("Event Date must not be null");
+        eventDates.forEach(localDate -> {
+            if (localDate.isBefore(LocalDate.now()))
+                throw new InvalidRequestException("Can not add a date in the past.");
+        });
         Optional<Category> categoryOpt = categoryService.findCategoryById(Long.valueOf(categoryId));
         if (!categoryOpt.isPresent() || categoryOpt.get().isDeleted()) throw  new NoSuchElementException("category not found with id: " + categoryId);
         Integer defaultMatchDuration = 60;

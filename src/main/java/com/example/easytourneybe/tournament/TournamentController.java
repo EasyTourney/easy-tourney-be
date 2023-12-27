@@ -45,7 +45,7 @@ public class TournamentController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> createTournament(@RequestBody CreateTournamentRequest request) {
+    public ResponseEntity<?> createTournament(@Valid @RequestBody CreateTournamentRequest request) {
         return ResponseEntity.ok()
                 .body(ResponseObject.builder().success(true).data(
                         tournamentService.createTournament(request.getTitle(), request.getCategoryId(), request.getEventDates(), request.getDescription())
