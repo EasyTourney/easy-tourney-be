@@ -3,6 +3,7 @@ package com.example.easytourneybe.match.interfaces;
 import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.match.Match;
 import com.example.easytourneybe.match.MatchDto;
+import com.example.easytourneybe.match.*;
 import com.example.easytourneybe.team.Team;
 
 import java.time.LocalTime;
@@ -21,4 +22,9 @@ public interface IMatchService {
     void updateMatch(Match match);
 
     List<Match> getMatchByEventDateId(Integer eventDateId);
+
+    List<LeaderBoardDto> getLeaderBoardByTournamentId(Integer tournamentId);
+
+    List<MatchOfLeaderBoardDto> getMatchOfLeaderBoardByTournamentId(Integer tournamentId);
+
 }

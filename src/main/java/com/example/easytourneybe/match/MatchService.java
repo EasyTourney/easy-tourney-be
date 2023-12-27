@@ -242,4 +242,14 @@ public class MatchService implements IMatchService {
         match.setTeamTwoResult(teamTwoResult);
         return matchRepository.save(match);
     }
+
+    @Override
+    public List<LeaderBoardDto> getLeaderBoardByTournamentId(Integer tournamentId) {
+        return matchRepository.getLeaderBoard(tournamentId);
+    }
+
+    @Override
+    public List<MatchOfLeaderBoardDto> getMatchOfLeaderBoardByTournamentId(Integer tournamentId) {
+        return matchRepository.getMatchOfLeaderBoard(tournamentId);
+    }
 }

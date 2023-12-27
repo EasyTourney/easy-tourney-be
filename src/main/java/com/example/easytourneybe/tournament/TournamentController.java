@@ -1,6 +1,7 @@
 package com.example.easytourneybe.tournament;
 
 import com.example.easytourneybe.enums.tournament.TournamentStatus;
+import com.example.easytourneybe.match.LeaderBoardDetailDto;
 import com.example.easytourneybe.model.ResponseObject;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -61,6 +60,20 @@ public class TournamentController {
                         .success(true)
                         .total(1)
                         .build()
+        );
+    }
+
+    @GetMapping("{tournamentId}/leaderboard")
+    public ResponseEntity<ResponseObject> getLeaderBoard(
+            @PathVariable Integer tournamentId
+    ) {
+        LeaderBoardDetailDto leaderBoardDetailDto = tournamentService.getDetailLeaderBoard(tournamentId);
+
+        ResponseObject responseObject = new ResponseObject(
+                true, 1, leaderBoardDetailDto
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(
+                responseObject
         );
     }
 }

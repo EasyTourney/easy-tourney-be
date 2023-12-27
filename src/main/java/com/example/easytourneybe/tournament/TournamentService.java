@@ -8,6 +8,9 @@ import com.example.easytourneybe.enums.tournament.TournamentStatus;
 import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.eventdate.EventDateService;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
+import com.example.easytourneybe.match.LeaderBoardDetailDto;
+import com.example.easytourneybe.match.LeaderBoardDto;
+import com.example.easytourneybe.match.MatchOfLeaderBoardDto;
 import com.example.easytourneybe.match.MatchService;
 import com.example.easytourneybe.model.ResponseObject;
 import com.example.easytourneybe.organizer_tournament.OrganizerTournament;
@@ -274,5 +277,17 @@ public class TournamentService {
 
     public Optional<Tournament> findById(Integer id){
         return tournamentRepository.findById(id);
+    }
+
+    public LeaderBoardDetailDto getDetailLeaderBoard(Integer tournamentId) {
+        tournamentRepository.findTournamentByIdAndIsDeletedFalse(tournamentId)
+                .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+        List<LeaderBoardDto> leaderBoard = matchService.getLeaderBoardByTournamentId(tournamentId);
+        List<MatchOfLeaderBoardDto> matchOfLeaderBoardDto = matchService.getMatchOfLeaderBoardByTournamentId(tournamentId);
+
+        return LeaderBoardDetailDto.builder()
+                .leaderBoard(leaderBoard)
+                .matches(matchOfLeaderBoardDto)
+                .build();
     }
 }
