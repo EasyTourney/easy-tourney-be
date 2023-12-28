@@ -85,7 +85,7 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
                 JOIN EventDate e ON e.id = m.eventDateId
                 WHERE t.tournamentId = :tournamentId
                 GROUP BY t.teamId
-                ORDER BY t.score DESC, the_diff DESC, total_result DESC, t.teamName ASC
+                ORDER BY rank, t.score DESC, the_diff DESC, total_result DESC, t.teamName ASC
             """)
     List<LeaderBoardDto> getLeaderBoard(Integer tournamentId);
 
@@ -101,11 +101,11 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
                                 THEN -1
                                 ELSE
                                     (CASE WHEN m.teamOneResult > m.teamTwoResult
-                                        THEN m.teamOneResult
+                                        THEN m.teamOneId
                                         ELSE
                                             (CASE WHEN m.teamOneResult = m.teamTwoResult
                                                 THEN 0
-                                                ELSE m.teamTwoResult
+                                                ELSE m.teamTwoId
                                             END)
                                      END)
                             END)
@@ -114,11 +114,11 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
                                 THEN -1
                                 ELSE
                                     (CASE WHEN m.teamOneResult > m.teamTwoResult
-                                        THEN m.teamOneResult
+                                        THEN m.teamOneId
                                         ELSE
                                             (CASE WHEN m.teamOneResult = m.teamTwoResult
                                                 THEN 0
-                                                ELSE m.teamTwoResult
+                                                ELSE m.teamTwoId
                                             END)
                                      END)
                             END)

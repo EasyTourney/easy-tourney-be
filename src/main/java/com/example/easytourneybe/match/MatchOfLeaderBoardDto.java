@@ -31,5 +31,5 @@ public class MatchOfLeaderBoardDto {
 
     private LocalTime endTime;
 
-    private Integer teamWinId;
+    private Long teamWinId;
 }
