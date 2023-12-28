@@ -77,8 +77,8 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
                 - SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamTwoResult ELSE m.teamOneResult END) AS the_diff,
                 SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamOneResult ELSE m.teamTwoResult END) AS total_result,
                 DENSE_RANK() OVER ( ORDER BY t.score DESC,
-                    SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamOneResult ELSE m.teamTwoResult END) DESC,
-                    SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamOneResult ELSE m.teamTwoResult END) DESC,
+                    SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamOneResult ELSE m.teamTwoResult END) -
+                    SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamTwoResult ELSE m.teamOneResult END) DESC,
                     SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamOneResult ELSE m.teamTwoResult END) DESC) AS rank)
                 FROM Team t
                 JOIN Match m ON t.id IN (m.teamOneId, m.teamTwoId)
