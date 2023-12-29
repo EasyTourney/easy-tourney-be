@@ -1,5 +1,6 @@
 package com.example.easytourneybe.generation;
 
+import com.example.easytourneybe.exceptions.InvalidRequestException;
 import com.example.easytourneybe.generation.interfaces.IGenerationService;
 import com.example.easytourneybe.model.ResponseObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +28,15 @@ public class GenerationController {
     @PostMapping(value = "/{tournamentId}")
     public ResponseEntity<?> generate(@PathVariable Integer tournamentId,
                                       @RequestBody(required = false) GenerationRequest request) {
-        List<GenerationDto> generations = generationService.generate(tournamentId, request.getDuration(), request.getBetweenTime(), request.getStartTime(),request.getEndTime());
-        ResponseObject responseObject = new ResponseObject(true, generations.size(), generations);
-        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+
+        if(request.isStartTimeValid() && request.isEndTimeValid() && request.isTimeRangeValid()) {
+            List<GenerationDto> generations = generationService.generate(tournamentId, request.getDuration(), request.getBetweenTime(), request.getStartTime(), request.getEndTime());
+            ResponseObject responseObject = new ResponseObject(true, generations.size(), generations);
+            return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+        }
+        else {
+            throw new InvalidRequestException("Start time or end time invalid");
+        }
     }
 
 
