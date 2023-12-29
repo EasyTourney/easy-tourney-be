@@ -1,25 +1,26 @@
 package com.example.easytourneybe.match.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
+import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.time.LocalTime;
 
 @AllArgsConstructor
-@Data
+@Setter
+@Getter
 @Builder
+@NoArgsConstructor
 public class EventCreateAndUpdateDto {
     @NotNull
-    @Max(1440)
-    @Min(1)
+    @Max(value = 1440, message = "time duration not valid.")
+    @Min(value = 1, message = "time duration not valid.")
     private Integer timeDuration;
     @NotNull
     @Length(min = 1, max = 30, message = "Title of Event must be between 1 and 30 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9\\s]*$", message = "Title can not contain special character")
     private String title;
 
     public void setTitle(String title) {

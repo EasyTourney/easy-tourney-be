@@ -4,6 +4,7 @@ import com.example.easytourneybe.match.dto.EventCreateAndUpdateDto;
 import com.example.easytourneybe.match.dto.MatchDto;
 import com.example.easytourneybe.match.interfaces.EventService;
 import com.example.easytourneybe.model.ResponseObject;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class EventController {
 
 
     @PostMapping("/{eventDateId}")
-    public ResponseEntity<?> createEvent(@PathVariable Integer eventDateId, @RequestBody EventCreateAndUpdateDto evtCreateDto) {
+    public ResponseEntity<?> createEvent(@PathVariable Integer eventDateId,@Valid @RequestBody EventCreateAndUpdateDto evtCreateDto) {
         var result = eventService.createEvent(eventDateId, evtCreateDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseObject.builder()
@@ -43,7 +44,7 @@ public class EventController {
     }
 
     @PutMapping("/{eventId}")
-    public ResponseEntity<?> updateEvent(@PathVariable Integer eventId, @RequestBody EventCreateAndUpdateDto eventDto) {
+    public ResponseEntity<?> updateEvent(@PathVariable Integer eventId,@Valid @RequestBody EventCreateAndUpdateDto eventDto) {
         List<MatchDto> result = eventService.updateEvent(eventId, eventDto);
         return ResponseEntity.ok(
                 ResponseObject.builder()

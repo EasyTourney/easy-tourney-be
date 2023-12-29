@@ -1,6 +1,7 @@
 package com.example.easytourneybe.match;
 
 import com.example.easytourneybe.enums.match.TypeMatch;
+import com.example.easytourneybe.enums.tournament.TournamentStatus;
 import com.example.easytourneybe.eventdate.EventDateService;
 import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
@@ -8,6 +9,7 @@ import com.example.easytourneybe.match.dto.EventCreateAndUpdateDto;
 import com.example.easytourneybe.match.dto.MatchDto;
 import com.example.easytourneybe.match.interfaces.EventService;
 import com.example.easytourneybe.match.interfaces.IMatchRepository;
+import com.example.easytourneybe.tournament.TournamentService;
 import com.example.easytourneybe.util.MatchUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +30,10 @@ public class EventServiceImpl implements EventService {
     private final IMatchRepository matchRepository;
 
     private final MatchUtils matchUtils;
+
+    private final TournamentService tournamentService;
     @Override
     public MatchDto createEvent(Integer eventDateId, EventCreateAndUpdateDto evtCreateDto) {
-        Integer timeDuration = evtCreateDto.getTimeDuration();
-        if (timeDuration <= 0 || timeDuration >=24*60)
-            throw new InvalidRequestException("Time duration not valid.");
 
         Optional<EventDate> eventDateOpt = eventDateService.findByEventDateId(eventDateId);
         if (eventDateOpt.isEmpty())
@@ -42,11 +43,12 @@ public class EventServiceImpl implements EventService {
             throw new InvalidRequestException("Can not add new Event into Event Date in the past: " + evtDate.getDate());
 
         LocalTime startTime = eventDateOpt.get().getStartTime();
+        int timeBetween = tournamentService.findById(evtDate.getTournamentId()).get().getTimeBetween();
         List<Match> matches = matchRepository.findAllByEventDateId(eventDateId);
         if (!matches.isEmpty()) {
             for (Match match : matches) {
                 if (match.getEndTime().isAfter(startTime))
-                    startTime = match.getEndTime();
+                    startTime = match.getEndTime().plusMinutes(timeBetween);
             }
         }
         if (evtDate.getDate().isEqual(LocalDate.now()) && LocalTime.now().isAfter(startTime))
@@ -64,6 +66,16 @@ public class EventServiceImpl implements EventService {
                 .type(TypeMatch.EVENT)
                 .matchDuration(evtCreateDto.getTimeDuration())
                 .build();
+
+        Integer tournamentId = eventDateService.findByEventDateId(eventDateId).get().getTournamentId();
+        TournamentStatus status = tournamentService.findById(tournamentId).get().getStatus();
+        if (status.equals(TournamentStatus.FINISHED))
+            throw new InvalidRequestException("Can not create or edit or delete Event in tournament has been Finished");
+        if (status.equals(TournamentStatus.DELETED))
+            throw new InvalidRequestException("Can not create or edit or delete Event in tournament has been Deleted");
+        if (status.equals(TournamentStatus.DISCARDED))
+            throw new InvalidRequestException("Can not create or edit or delete Event in tournament has been Discarded");
+
         newEvent = matchRepository.save(newEvent);
         return matchUtils.convertMatchtoMatchDTO(newEvent);
     }
@@ -94,6 +106,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public List<MatchDto> updateEvent(Integer eventId, EventCreateAndUpdateDto eventDto) {
+
         Match event = checkEventValidity(eventId);
         EventDate eventDate = eventDateService.findByEventDateId(event.getEventDateId()).get();
 
@@ -132,6 +145,14 @@ public class EventServiceImpl implements EventService {
         Match event = eventOpt.get();
         if (!event.getType().equals(TypeMatch.EVENT))
             throw new NoSuchElementException("Not found Event with Id: " + eventId);
+        Integer tournamentId = eventDateService.findByEventDateId(event.getEventDateId()).get().getTournamentId();
+        TournamentStatus status = tournamentService.findById(tournamentId).get().getStatus();
+        if (status.equals(TournamentStatus.FINISHED))
+            throw new InvalidRequestException("Can not create or edit or delete Event in tournament has been Finished");
+        if (status.equals(TournamentStatus.DELETED))
+            throw new InvalidRequestException("Can not create or edit or delete Event in tournament has been Deleted");
+        if (status.equals(TournamentStatus.DISCARDED))
+            throw new InvalidRequestException("Can not create or edit or delete Event in tournament has been Discarded");
         return event;
     }
 }
