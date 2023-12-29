@@ -1,5 +1,6 @@
 package com.example.easytourneybe.match.interfaces;
 
+import com.example.easytourneybe.generation.GenerationDto;
 import com.example.easytourneybe.match.dto.MatchDto;
 import com.example.easytourneybe.match.dto.EventCreateAndUpdateDto;
 
@@ -7,9 +8,9 @@ import java.util.List;
 
 public interface EventService {
 
-    MatchDto createEvent(Integer eventDateId, EventCreateAndUpdateDto evtCreateDto);
+    GenerationDto createEvent(Integer eventDateId, EventCreateAndUpdateDto evtCreateDto);
 
-    void deleteEvent(Integer eventId);
+    GenerationDto deleteEvent(Integer eventId);
 
-    List<MatchDto> updateEvent(Integer eventId, EventCreateAndUpdateDto eventDto);
+    GenerationDto updateEvent(Integer eventId, EventCreateAndUpdateDto eventDto);
 }

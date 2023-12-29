@@ -1,7 +1,7 @@
 package com.example.easytourneybe.match;
 
+import com.example.easytourneybe.generation.GenerationDto;
 import com.example.easytourneybe.match.dto.EventCreateAndUpdateDto;
-import com.example.easytourneybe.match.dto.MatchDto;
 import com.example.easytourneybe.match.interfaces.EventService;
 import com.example.easytourneybe.model.ResponseObject;
 import jakarta.validation.Valid;
@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/event")
@@ -34,22 +33,23 @@ public class EventController {
 
     @DeleteMapping("/{eventId}")
     public ResponseEntity<?> deleteEvent(@PathVariable Integer eventId) {
-        eventService.deleteEvent(eventId);
+        GenerationDto result = eventService.deleteEvent(eventId);
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .success(true)
-                        .total(1)
+                        .total(result.getMatches().size())
+                        .data(result)
                         .build()
         );
     }
 
     @PutMapping("/{eventId}")
     public ResponseEntity<?> updateEvent(@PathVariable Integer eventId,@Valid @RequestBody EventCreateAndUpdateDto eventDto) {
-        List<MatchDto> result = eventService.updateEvent(eventId, eventDto);
+        GenerationDto result = eventService.updateEvent(eventId, eventDto);
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .success(true)
-                        .total(result.size())
+                        .total(result.getMatches().size())
                         .data(result)
                         .build()
         );

@@ -49,6 +49,7 @@ public class MatchService implements IMatchService {
     @Autowired
     private EventDateService eventDateService;
 
+
     @Override
     public List<List<Team>> matchList(Integer idTournament) {
         //If the tournament has matches, all old matches will be deleted to create a new generation
@@ -321,7 +322,12 @@ public class MatchService implements IMatchService {
             oldIndex = matchesInDate.indexOf(matchesInDate.stream().filter(eachMatch -> eachMatch.getId().equals(match.getId())).findFirst().get());
 
         int duration = match.getMatchDuration();
-        int betweenTime = 10;
+        if (!isAddNewMatchInDate && !isRemoveMatchInDate)
+            newEventDateId = match.getEventDateId();
+        Optional<EventDate> newEventDateOpt = eventDateService.findByEventDateId(newEventDateId);
+        if (newEventDateOpt.isEmpty())
+            throw new NoSuchElementException("Not found Event Date with Id: " + newEventDateId);
+        int betweenTime = tournamentRepository.findTournamentById(newEventDateOpt.get().getTournamentId()).get().getTimeBetween();
         int timeChange = duration + betweenTime;
         LocalTime newStartTime = null;
         LocalTime newEndTime = null;
@@ -386,10 +392,11 @@ public class MatchService implements IMatchService {
                 else
                     newStartTime = matchesInDate.get(matchesInDate.size() - 1).getEndTime().plusMinutes(betweenTime);
             }
-
             match.setStartTime(newStartTime.minusMinutes(timeDifference));
             match.setEndTime(match.getStartTime().plusMinutes(duration));
             match.setEventDateId(newEventDateId);
+            if (match.getStartTime().isBefore(LocalTime.now()))
+                throw new InvalidRequestException("Can not move Match or Event to the past.");
             matchesInDate.add(match);
         }
 

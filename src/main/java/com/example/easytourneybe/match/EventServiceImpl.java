@@ -5,6 +5,7 @@ import com.example.easytourneybe.enums.tournament.TournamentStatus;
 import com.example.easytourneybe.eventdate.EventDateService;
 import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
+import com.example.easytourneybe.generation.GenerationDto;
 import com.example.easytourneybe.match.dto.EventCreateAndUpdateDto;
 import com.example.easytourneybe.match.dto.MatchDto;
 import com.example.easytourneybe.match.interfaces.EventService;
@@ -33,7 +34,7 @@ public class EventServiceImpl implements EventService {
 
     private final TournamentService tournamentService;
     @Override
-    public MatchDto createEvent(Integer eventDateId, EventCreateAndUpdateDto evtCreateDto) {
+    public GenerationDto createEvent(Integer eventDateId, EventCreateAndUpdateDto evtCreateDto) {
 
         Optional<EventDate> eventDateOpt = eventDateService.findByEventDateId(eventDateId);
         if (eventDateOpt.isEmpty())
@@ -77,18 +78,28 @@ public class EventServiceImpl implements EventService {
             throw new InvalidRequestException("Can not create or edit or delete Event in tournament has been Discarded");
 
         newEvent = matchRepository.save(newEvent);
-        return matchUtils.convertMatchtoMatchDTO(newEvent);
+        matches = matchRepository.findAllByEventDateId(eventDateId);
+        return GenerationDto.builder()
+                .eventDateId(eventDateId)
+                .matches(matchUtils.convertMatchToMatchDto(matches))
+                .date(evtDate.getDate())
+                .startTime(evtDate.getStartTime())
+                .endTime(evtDate.getEndTime())
+                .build();
+
     }
 
     @Override
     @Transactional
-    public void deleteEvent(Integer eventId) {
+    public GenerationDto deleteEvent(Integer eventId) {
         Match event = checkEventValidity(eventId);
 
         EventDate eventDate = eventDateService.findByEventDateId(event.getEventDateId()).get();
 
         LocalTime startTime = event.getStartTime();
         Integer duration = event.getMatchDuration();
+        int betweenTime = tournamentService.findById(eventDate.getTournamentId()).get().getTimeBetween();
+        int timeToMinus = duration + betweenTime;
         if (eventDate.getDate().compareTo(LocalDate.now()) <= 0 && LocalTime.now().isAfter(startTime))
             throw new InvalidRequestException("Can not delete Event in the past or in processing");
 
@@ -96,16 +107,23 @@ public class EventServiceImpl implements EventService {
         List<Match> matches = matchRepository.findAllByEventDateId(event.getEventDateId());
         for (Match match : matches) {
             if (match.getStartTime().isAfter(startTime)) {
-                match.setStartTime(match.getStartTime().minusMinutes(duration));
-                match.setEndTime(match.getEndTime().minusMinutes(duration));
+                match.setStartTime(match.getStartTime().minusMinutes(timeToMinus));
+                match.setEndTime(match.getEndTime().minusMinutes(timeToMinus));
             }
         }
         matchRepository.saveAll(matches);
+        return GenerationDto.builder()
+                .eventDateId(eventDate.getId())
+                .matches(matchUtils.convertMatchToMatchDto(matches))
+                .date(eventDate.getDate())
+                .startTime(eventDate.getStartTime())
+                .endTime(eventDate.getEndTime())
+                .build();
     }
 
     @Override
     @Transactional
-    public List<MatchDto> updateEvent(Integer eventId, EventCreateAndUpdateDto eventDto) {
+    public GenerationDto updateEvent(Integer eventId, EventCreateAndUpdateDto eventDto) {
 
         Match event = checkEventValidity(eventId);
         EventDate eventDate = eventDateService.findByEventDateId(event.getEventDateId()).get();
@@ -135,7 +153,14 @@ public class EventServiceImpl implements EventService {
             }
         }
         matches = matchRepository.saveAll(matches);
-        return matchUtils.convertMatchToMatchDto(matches);
+
+        return GenerationDto.builder()
+                .eventDateId(eventDate.getId())
+                .matches(matchUtils.convertMatchToMatchDto(matches))
+                .date(eventDate.getDate())
+                .startTime(eventDate.getStartTime())
+                .endTime(eventDate.getEndTime())
+                .build();
     }
 
     public Match checkEventValidity(Integer eventId) {
