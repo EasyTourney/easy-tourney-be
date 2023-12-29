@@ -76,4 +76,16 @@ public class TournamentController {
                 responseObject
         );
     }
+
+    @PutMapping("/{tournamentId}/status")
+    public ResponseEntity<ResponseObject> updateTournamentStatus(
+            @PathVariable Integer tournamentId,
+            @Valid @RequestBody StatusRequest status
+    ) {
+        tournamentService.updateTournamentStatus(tournamentId, status);
+        ResponseObject responseObject = ResponseObject.builder().total(1).success(true).build();
+        return ResponseEntity.status(HttpStatus.OK).body(
+                responseObject
+        );
+    }
 }

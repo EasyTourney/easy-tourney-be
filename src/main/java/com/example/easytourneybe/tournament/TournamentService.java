@@ -5,8 +5,8 @@ import com.example.easytourneybe.category.interfaces.CategoryService;
 import com.example.easytourneybe.enums.UserRole;
 import com.example.easytourneybe.enums.tournament.TournamentFormat;
 import com.example.easytourneybe.enums.tournament.TournamentStatus;
-import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.eventdate.EventDateService;
+import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
 import com.example.easytourneybe.match.dto.LeaderBoardDetailDto;
 import com.example.easytourneybe.match.dto.LeaderBoardDto;
@@ -169,6 +169,7 @@ public class TournamentService {
                 - Event date haven't match
          */
         if (tournamentUpdateDto.getEventDates() != null) {
+            List<EventDate> eventDates = eventDateService.findAllByTournamentId(tournamentId);
             if (allowedResetAllEventDate.contains(tournament.getStatus())) {
                 eventDateService.deleteAllByTournamentId(tournamentId);
                 eventDateService.saveAll(tournamentUpdateDto.getEventDates().stream().map(date -> EventDate.builder()
@@ -178,7 +179,6 @@ public class TournamentService {
                         .endTime(LocalTime.of(23, 59, 59))
                         .build()).toList());
             } else {
-                List<EventDate> eventDates = eventDateService.findAllByTournamentId(tournamentId);
 
                 for (EventDate eventDate : eventDates) {
                     LocalDate date = eventDate.getDate();
@@ -218,10 +218,6 @@ public class TournamentService {
                 tournamentUpdateDto.getDescription() :
                 tournament.getDescription());
 
-        tournament.setStatus((tournamentUpdateDto.getStatus() != null && allowedBasic.contains(tournament.getStatus())) ?
-                tournamentUpdateDto.getStatus() :
-                tournament.getStatus());
-
         tournament.setCategoryId((tournamentUpdateDto.getCategoryId() != null && allowedAdvance.contains(tournament.getStatus())) ?
                 categoryService.findCategoryById(Long.valueOf(tournamentUpdateDto.getCategoryId()))
                         .orElseThrow(() -> new NoSuchElementException("Category not found")).getCategoryId().intValue() :
@@ -234,6 +230,9 @@ public class TournamentService {
 
     @Transactional
     public TournamentGeneralDto updateTournament(Integer tournamentId, TournamentUpdateDto tournamentUpdateDto) {
+        //Check if data request is not valid throw exception
+        TournamentUpdateDto.validateRequest(tournamentUpdateDto);
+
         // Find the tournament if not exist throw exception
         Tournament tournament = tournamentRepository.findTournamentByIdAndIsDeletedFalse(tournamentId)
                 .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
@@ -289,5 +288,17 @@ public class TournamentService {
                 .leaderBoard(leaderBoard)
                 .matches(matchOfLeaderBoardDto)
                 .build();
+    }
+
+    public void updateTournamentStatus(Integer tournamentId, StatusRequest statusRequest) {
+        Tournament tournament = tournamentRepository.findTournamentByIdAndIsDeletedFalse(tournamentId)
+                .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+
+        if (statusRequest.getStatus() == TournamentStatus.DELETED || statusFlow.indexOf(statusRequest.getStatus()) < statusFlow.indexOf(tournament.getStatus())) {
+            throw new InvalidRequestException("Cannot update tournament status");
+        }
+
+        tournament.setStatus(statusRequest.getStatus());
+        tournamentRepository.save(tournament);
     }
 }

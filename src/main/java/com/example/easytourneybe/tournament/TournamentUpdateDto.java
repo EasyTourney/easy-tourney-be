@@ -1,8 +1,5 @@
 package com.example.easytourneybe.tournament;
 
-import com.example.easytourneybe.enums.tournament.TournamentStatus;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,9 +23,6 @@ public class TournamentUpdateDto {
     @Length(max = 100, message = "Description must be less than 100 characters")
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    private TournamentStatus status;
-
     private Integer categoryId;
 
     private List<Integer> organizers;
@@ -45,7 +39,7 @@ public class TournamentUpdateDto {
 
     public void setOrganizers(List<Integer> organizers) {
         try {
-            this.organizers = organizers;
+            this.organizers = organizers.stream().distinct().toList();
         } catch (Exception e) {
             throw new HttpMessageNotReadableException("Request invalid data");
         }
@@ -53,10 +47,23 @@ public class TournamentUpdateDto {
 
     public void setEventDates(List<LocalDate> eventDates) {
         try {
-            this.eventDates = eventDates;
+            this.eventDates = eventDates.stream().distinct().toList();
         } catch (Exception e) {
             throw new HttpMessageNotReadableException("Invalid date format");
         }
+    }
+
+    public static void validateRequest(TournamentUpdateDto request) {
+
+        if (request.getTitle() == null
+            && request.getDescription() == null
+            && request.getCategoryId() == null
+            && request.getOrganizers() == null
+            && request.getEventDates() == null) {
+
+            throw new HttpMessageNotReadableException("Request invalid data");
+        }
+
     }
 }
 
