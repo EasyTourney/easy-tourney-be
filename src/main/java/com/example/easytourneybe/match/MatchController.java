@@ -31,18 +31,27 @@ public class MatchController {
                 responseObject
         );
     }
-    @PutMapping("/{matchID}")
+    @PutMapping("/result/{matchID}")
     public ResponseEntity<ResponseObject> updateMatchResult(
             @PathVariable Integer tournamentId,
             @PathVariable Integer matchID,
             @RequestBody Match match
            ) {
-        Match updateMatch=matchService.updateMatch(tournamentId,matchID, match.getTeamOneResult(), match.getTeamTwoResult());
+        Match updateMatch=matchService.updateMatchResult(tournamentId,matchID, match.getTeamOneResult(), match.getTeamTwoResult());
         ResponseObject responseObject = new ResponseObject(
                 true, 1, updateMatch
         );
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
+    @PutMapping("{matchID}")
+    public ResponseEntity<ResponseObject> updateMatchDetails(
+            @PathVariable Integer tournamentId,
+            @PathVariable Integer matchID,
+            @RequestBody Match match
+    ) {
+        return matchService.updateMatchDetails(tournamentId,matchID, match.getTeamOneId(), match.getTeamTwoId(), match.getMatchDuration());
+    }
+
 
     @PutMapping("/dragAndDrop")
     public ResponseEntity<?> dragAndDropMatchOrEvent(@RequestBody RequestDragDropMatch request)

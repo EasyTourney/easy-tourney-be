@@ -62,7 +62,7 @@ public class PlayerController {
             @PathVariable Long playerID,
             @Valid @RequestBody PlayerRequestDto player
     ) {
-        Player updatePlayer=playerService.updatePlayer(teamID,playerID, player.getPlayerName().trim(), player.getDateOfBirth(), player.getPhone().trim());
+        Player updatePlayer=playerService.updatePlayer(teamID,playerID, player.getPlayerName().trim(), player.getDateOfBirth(), player.getPhone());
         ResponseObject responseObject = new ResponseObject(
                 true, 1, updatePlayer
         );

@@ -46,21 +46,21 @@ public class TeamController {
         );
     }
     @PutMapping("/team/{id}")
-    public ResponseEntity<ResponseObject> updateTeam(@PathVariable Integer tournament_id, @PathVariable Integer id, @Valid @RequestBody Team team) {
+    public ResponseEntity<ResponseObject> updateTeam(@PathVariable Integer tournament_id, @PathVariable Long id, @Valid @RequestBody Team team) {
         Optional<Team> updateTeam = teamService.updateTeam(tournament_id, id, team.getTeamName().trim());
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject(true, 1, updateTeam)
         );
     }
     @DeleteMapping("/team/{id}")
-    public ResponseEntity<ResponseObject> deleteTeam(@PathVariable Integer tournament_id, @PathVariable Integer id) {
+    public ResponseEntity<ResponseObject> deleteTeam(@PathVariable Integer tournament_id, @PathVariable Long id) {
         Optional<Team> deleteTeam = teamService.deleteTeam(tournament_id, id);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject(true, 1, deleteTeam));
     }
 
     @GetMapping("/team/{id}")
-    public ResponseEntity<ResponseObject> findTeamById(@PathVariable Integer tournament_id, @PathVariable Integer id) {
+    public ResponseEntity<ResponseObject> findTeamById(@PathVariable Integer tournament_id, @PathVariable Long id) {
         Team team = teamService.findTeamById(tournament_id, id);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject(true, 1, team)

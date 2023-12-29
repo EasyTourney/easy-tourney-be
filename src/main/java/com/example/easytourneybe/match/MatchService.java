@@ -12,6 +12,7 @@ import com.example.easytourneybe.generation.GenerationDto;
 import com.example.easytourneybe.match.dto.ResponseChangeMatch;
 import com.example.easytourneybe.match.interfaces.IMatchRepository;
 import com.example.easytourneybe.match.interfaces.IMatchService;
+import com.example.easytourneybe.model.ResponseObject;
 import com.example.easytourneybe.team.Team;
 import com.example.easytourneybe.team.TeamService;
 import com.example.easytourneybe.tournament.TournamentRepository;
@@ -19,8 +20,11 @@ import com.example.easytourneybe.util.MatchUtils;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -112,23 +116,20 @@ public class MatchService implements IMatchService {
             LocalTime endMatch = eventDates.get(i).getStartTime().plusMinutes(duration);
             LocalTime endDate = LocalTime.of(23, 59, 59);
             List<List<LocalTime>> times = new ArrayList<>();
-            if (numMatch % numEvent >= numEvent) {
+            if (numMatch % numEvent >= timeSheetEachEventDate) {
                 timeSheetEachEventDate++;
             }
             int j = 0;
-            LocalDateTime thisEventDate = LocalDateTime.of(eventDates.get(i).getDate(), endDate);
-            LocalDateTime checkDateTime = LocalDateTime.of(eventDates.get(i).getDate(), startMatch);
 
             //Ensure that the time slots fall within the allowed time range for each event date.
             while (startMatch.isBefore(eventDates.get(i).getEndTime()) && endMatch.isBefore(eventDates.get(i).getEndTime())
-                    && j < timeSheetEachEventDate && startMatch.isBefore(endDate) && endMatch.isBefore(endDate)) {
+                    && j < timeSheetEachEventDate&& startMatch.isBefore(endDate) && endMatch.isBefore(endDate)) {
                 List<LocalTime> matchTime = new ArrayList<>(2);
                 matchTime.add(startMatch);
                 matchTime.add(endMatch);
                 times.add(matchTime);
                 startMatch = endMatch.plusMinutes(betweenTime);
                 endMatch = startMatch.plusMinutes(duration);
-                checkDateTime = checkDateTime.plusMinutes(betweenTime);
                 numMatch--;
                 j++;
             }
@@ -161,10 +162,9 @@ public class MatchService implements IMatchService {
         List<Match> matchList = new ArrayList<>();
         List<MatchDto> matchDTOs;
         int j = 0;
-        int duration;
+
         //Combine the matches and match times together.
         for (Map.Entry<EventDate, List<List<LocalTime>>> entry : schedule.entrySet()) {
-            duration = tournamentRepository.findById(entry.getKey().getTournamentId()).get().getMatchDuration();
             for (int i = 0; i < entry.getValue().size(); i++, j++) {
                 Match match = new Match();
                 List<LocalTime> times = entry.getValue().get(i);
@@ -173,7 +173,6 @@ public class MatchService implements IMatchService {
                 match.setEndTime(times.get(1));
                 match.setTeamOneId(matches.get(j).get(0).getTeamId());
                 match.setTeamTwoId(matches.get(j).get(1).getTeamId());
-                match.setMatchDuration(duration);
                 match.setType(TypeMatch.MATCH);
                 matchList.add(match);
             }
@@ -196,7 +195,6 @@ public class MatchService implements IMatchService {
     public Match getMatchById(Long matchId) {
         return matchRepository.getById(matchId);
     }
-
 
     @Override
     public List<Match> getMatchByEventDateId(Integer eventDateId) {
@@ -431,8 +429,8 @@ public class MatchService implements IMatchService {
             match.setId(Long.parseLong(data[1].toString()));
             match.setTeamOneId(Long.parseLong(data[2].toString()));
             match.setTeamTwoId(Long.parseLong(data[3].toString()));
-            match.setTeamOneResult(Integer.parseInt(data[4].toString()));
-            match.setTeamTwoResult(Integer.parseInt(data[5].toString()));
+            match.setTeamOneResult(data[4] != null ? Integer.parseInt(data[4].toString()) : null);
+            match.setTeamTwoResult(data[5] != null ? Integer.parseInt(data[5].toString()) : null);
             match.setStartTime(LocalTime.parse(data[6].toString()));
             match.setEndTime(LocalTime.parse(data[7].toString()));
             match.setEventDateId(Integer.parseInt(data[8].toString()));
@@ -444,22 +442,76 @@ public class MatchService implements IMatchService {
     }
 
     public List<ResultDto> getAllResult(Integer tournamentId) {
-        List<Object[]> match = matchRepository.getAllResult(tournamentId);
+        List<Object[]> match= matchRepository.getAllResult(tournamentId);
         return processArrayData(match);
     }
 
-    public Match updateMatch(Integer tournamentId, Integer matchID, Integer teamOneResult, Integer teamTwoResult) {
+    public Match updateMatchResult(Integer tournamentId,Integer matchID, Integer teamOneResult, Integer teamTwoResult) {
         checkMatchInTournament(tournamentId, matchID);
-        Match match = matchRepository.findById(matchID).orElseThrow(() -> new NoSuchElementException("Match not found"));
-        if (teamOneResult == null || teamTwoResult == null) {
+        Match match=matchRepository.findById(matchID).orElseThrow(()->new NoSuchElementException("Match not found")) ;
+        if (teamOneResult==null || teamTwoResult==null) {
             throw new InvalidRequestException("Result must not be null");
         }
-        if (teamOneResult < 0 || teamTwoResult < 0) {
+        if (teamOneResult<0 || teamTwoResult<0) {
             throw new InvalidRequestException("Result must be equal to 0 or greater than 0");
         }
         match.setTeamOneResult(teamOneResult);
         match.setTeamTwoResult(teamTwoResult);
         return matchRepository.save(match);
+    }
+
+    public ResponseEntity<ResponseObject> updateMatchDetails(Integer tournamentId, Integer matchID, Long teamOneId, Long teamTwoId, Integer matchDuration) {
+        checkMatchInTournament(tournamentId, matchID);
+        Match match = matchRepository.findById(matchID).orElseThrow(() -> new NoSuchElementException("Match not found"));
+        if(matchDuration<=0){
+            throw new InvalidRequestException("Match duration must be greater than 0");
+        }
+        if (!teamService.checkTeamExist(tournamentId, teamOneId) || !teamService.checkTeamExist(tournamentId, teamTwoId)) {
+            throw new NoSuchElementException("Team not found");
+        }
+        if (teamOneId == null || teamTwoId == null) {
+            throw new InvalidRequestException("Team must not be null");
+        }
+        if (teamOneId.equals(teamTwoId)) {
+            throw new InvalidRequestException("Two team must not be equal");
+        }
+        if (!Objects.equals(match.getMatchDuration(), matchDuration)) {
+            int timeChange = matchDuration - match.getMatchDuration();
+            if (match.getEndTime().plusMinutes(matchDuration).isBefore(match.getEndTime()) && timeChange > 0) {
+                throw new InvalidRequestException("Match time is out of range");
+            }
+            match.setEndTime(match.getStartTime().plusMinutes(matchDuration));
+            match.setMatchDuration(matchDuration);
+            if (timeChange > 0) {
+                List<Match> matches = matchRepository.getAllByEventDateIdOrOrderByStartTime(match.getEventDateId(), match.getStartTime());
+                Match matchBefore = match;
+                for (Match m : matches) {
+                    if (matchBefore.getEndTime().isAfter(m.getStartTime())) {
+                        long delayTime =  Duration.between( m.getStartTime(),matchBefore.getEndTime()).toMinutes();
+                        if ((m.getEndTime().plusMinutes(delayTime).isBefore(m.getEndTime()) ||m.getStartTime().plusMinutes(delayTime).isBefore(m.getStartTime())) && delayTime > 0) {
+                            throw new InvalidRequestException("Match time is out of range");
+                        }
+                        //If the previous match ends after the next one, then delay the subsequent match by a period of time equal to the change in the match.
+                        m.setStartTime(m.getStartTime().plusMinutes(delayTime));
+                        m.setEndTime(m.getEndTime().plusMinutes(delayTime));
+
+                    }
+                    matchBefore = m;
+                }
+            }
+        }
+        match.setTeamOneId(teamOneId);
+        match.setTeamTwoId(teamTwoId);
+        ResponseObject responseObject = new ResponseObject(
+                true, 1, matchRepository.save(match)
+        );
+        // check duplicate match
+        List<Match> duplicateMatch = matchRepository.findDuplicateMatch(tournamentId, teamOneId, teamTwoId);
+        if (duplicateMatch.size() > 1) {
+            //if there are a duplicate match, then warning
+            responseObject.setAdditionalData(java.util.Collections.singletonMap("duplicateMatch", duplicateMatch));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 
     @Override

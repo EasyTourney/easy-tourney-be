@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
@@ -60,7 +61,7 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
             FROM match m 
             JOIN event_date ed ON m.event_date_id = ed.id 
             JOIN tournament t ON ed.tournament_id = t.tournament_id 
-            WHERE t.tournament_id = :tournamentId
+            WHERE t.tournament_id = :tournamentId AND m.team_one_id IS NOT NULL AND m.team_two_id IS NOT NULL
             ORDER BY ed.date DESC""", nativeQuery = true)
     List<Object[]> getAllResult(Integer tournamentId);
 
@@ -75,6 +76,22 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
             JOIN tournament t ON ed.tournament_id = t.tournament_id 
             WHERE t.tournament_id = :tournamentId AND m.id = :matchID""", nativeQuery = true)
     boolean isMatchInTournament(Integer tournamentId, Integer matchID);
+    @Query(value = """
+        SELECT m.*
+        FROM match m 
+        JOIN event_date ed ON m.event_date_id = ed.id 
+        JOIN tournament t ON ed.tournament_id = t.tournament_id 
+        WHERE t.tournament_id = :tournamentId 
+        AND( (m.team_one_id = :teamOneId AND m.team_two_id = :teamTwoId) OR(m.team_one_id=:teamTwoId AND m.team_two_id = :teamOneId)) """, nativeQuery = true)
+    List<Match>findDuplicateMatch(Integer tournamentId, Long teamOneId, Long teamTwoId);
+    @Query(value = """
+        SELECT m.*
+        FROM match m 
+        JOIN event_date ed ON m.event_date_id = ed.id 
+        WHERE m.start_time > :startTime AND m.event_date_id = :eventDateId
+        ORDER BY m.start_time ASC
+        """, nativeQuery = true)
+    List<Match>getAllByEventDateIdOrOrderByStartTime(Integer eventDateId, LocalTime startTime);
 
     List<Match> findAllByEventDateId(Integer eventDateId);
 
@@ -84,15 +101,15 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
                 - SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamTwoResult ELSE m.teamOneResult END) AS the_diff,
                 SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamOneResult ELSE m.teamTwoResult END) AS total_result,
                 DENSE_RANK() OVER ( ORDER BY t.score DESC,
-                    SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamOneResult ELSE m.teamTwoResult END) -
-                    SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamTwoResult ELSE m.teamOneResult END) DESC,
+                    SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamOneResult ELSE m.teamTwoResult END) DESC,
+                    SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamOneResult ELSE m.teamTwoResult END) DESC,
                     SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamOneResult ELSE m.teamTwoResult END) DESC) AS rank)
                 FROM Team t
                 JOIN Match m ON t.id IN (m.teamOneId, m.teamTwoId)
                 JOIN EventDate e ON e.id = m.eventDateId
                 WHERE t.tournamentId = :tournamentId
                 GROUP BY t.teamId
-                ORDER BY rank, t.score DESC, the_diff DESC, total_result DESC, t.teamName ASC
+                ORDER BY t.score DESC, the_diff DESC, total_result DESC, t.teamName ASC
             """)
     List<LeaderBoardDto> getLeaderBoard(Integer tournamentId);
 
@@ -108,11 +125,11 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
                                 THEN -1
                                 ELSE
                                     (CASE WHEN m.teamOneResult > m.teamTwoResult
-                                        THEN m.teamOneId
+                                        THEN m.teamOneResult
                                         ELSE
                                             (CASE WHEN m.teamOneResult = m.teamTwoResult
                                                 THEN 0
-                                                ELSE m.teamTwoId
+                                                ELSE m.teamTwoResult
                                             END)
                                      END)
                             END)
@@ -121,11 +138,11 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
                                 THEN -1
                                 ELSE
                                     (CASE WHEN m.teamOneResult > m.teamTwoResult
-                                        THEN m.teamOneId
+                                        THEN m.teamOneResult
                                         ELSE
                                             (CASE WHEN m.teamOneResult = m.teamTwoResult
                                                 THEN 0
-                                                ELSE m.teamTwoId
+                                                ELSE m.teamTwoResult
                                             END)
                                      END)
                             END)

@@ -31,9 +31,9 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
             "JOIN tournament tm ON t.tournamentId = tm.id " +
             "WHERE t.tournamentId = :tournamentId AND t.teamId = :id " +
             "AND (tm.isDeleted = false AND tm.status != 'DISCARDED')")
-    Optional<Team> findTeamById(@Param("tournamentId") Integer tournamentId, @Param("id") Integer id);
+    Optional<Team> findTeamById(@Param("tournamentId") Integer tournamentId, @Param("id") Long id);
 
-    void deleteByTournamentIdAndTeamId(Integer tournamentId, Integer teamId);
+    void deleteByTournamentIdAndTeamId(Integer tournamentId, Long teamId);
 
     @Query("SELECT team FROM Team team WHERE team.tournamentId = :tournament_id")
     List<Team> findTeamByTournamentId(@Param("tournament_id") Integer tournamentId);

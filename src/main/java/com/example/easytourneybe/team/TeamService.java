@@ -42,7 +42,7 @@ public class TeamService {
         team.setCreatedAt(LocalDateTime.now());
         return teamRepository.save(team);
     }
-    public Optional<Team> updateTeam(Integer tournamentId, Integer id, String teamName) {
+    public Optional<Team> updateTeam(Integer tournamentId, Long id, String teamName) {
         Optional<Team> teamOptional = teamRepository.findTeamById(tournamentId, id);
         if (teamOptional.isPresent()) {
             Team team = teamOptional.get();
@@ -62,7 +62,7 @@ public class TeamService {
         }
     }
     @Transactional
-    public Optional<Team> deleteTeam(Integer tournamentId, Integer id) {
+    public Optional<Team> deleteTeam(Integer tournamentId, Long id) {
         Optional<Team> teamOptional = teamRepository.findTeamById(tournamentId,id);
         if (teamOptional.isPresent()) {
             Team team = teamOptional.get();
@@ -81,7 +81,7 @@ public class TeamService {
         teamRepository.deleteAll(foundTeam);
     }
 
-    public Team findTeamById(Integer tournamentId, Integer id) {
+    public Team findTeamById(Integer tournamentId, Long id) {
            Team team = teamRepository.findTeamById(tournamentId, id).orElseThrow(() -> new NoSuchElementException("Team not found"));
           return team;
     }
@@ -89,5 +89,9 @@ public class TeamService {
     public List<Team> getAllTeamByTournamentId(Integer idTournament){return teamRepository.findTeamByTournamentId(idTournament);}
     public Team getTeamById(Long id) {
         return teamRepository.getTeamByTeamId(id);
+    }
+
+    public boolean checkTeamExist(Integer tournamentId, Long teamId) {
+        return teamRepository.findTeamById(tournamentId, teamId).isPresent();
     }
 }
