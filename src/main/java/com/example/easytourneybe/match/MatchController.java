@@ -1,11 +1,15 @@
 package com.example.easytourneybe.match;
 
+import com.example.easytourneybe.match.dto.ResultDto;
+import com.example.easytourneybe.match.dto.RequestDragDropMatch;
 import com.example.easytourneybe.model.ResponseObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 
@@ -14,7 +18,7 @@ import java.util.List;
 @RequestMapping("/tournament/{tournamentId}/match")
 public class MatchController {
    @Autowired
-    private  MatchService matchService;
+    private MatchService matchService;
     @GetMapping("/result")
     public ResponseEntity<ResponseObject> getAllMatchResult(
             @PathVariable Integer tournamentId
@@ -40,5 +44,18 @@ public class MatchController {
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 
-
+    @PutMapping("/dragAndDrop")
+    public ResponseEntity<?> dragAndDropMatchOrEvent(@RequestBody RequestDragDropMatch request)
+    {
+        var data = matchService.dragAndDropMatch(request.getMatchId(),
+                request.getNewEventDateId(),
+                request.getNewIndexOfMatch());
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .success(true)
+                        .total(data.size())
+                        .data(data)
+                        .build()
+        );
+    }
 }

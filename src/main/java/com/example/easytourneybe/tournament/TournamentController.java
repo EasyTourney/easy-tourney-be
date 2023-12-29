@@ -1,7 +1,7 @@
 package com.example.easytourneybe.tournament;
 
 import com.example.easytourneybe.enums.tournament.TournamentStatus;
-import com.example.easytourneybe.match.LeaderBoardDetailDto;
+import com.example.easytourneybe.match.dto.LeaderBoardDetailDto;
 import com.example.easytourneybe.model.ResponseObject;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

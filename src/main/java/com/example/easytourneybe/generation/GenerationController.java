@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/generate")
 public class GenerationController {
@@ -16,12 +17,17 @@ public class GenerationController {
     @Autowired
     private IGenerationService generationService;
 
-
+    @GetMapping("/{tournamentId}")
+    public ResponseEntity<?> getAllGeneration(@PathVariable Integer tournamentId){
+        List<GenerationDto> generations= generationService.getAllGeneration(tournamentId);
+        ResponseObject responseObject = new ResponseObject(true, generations.size(), generations);
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+    }
 
     @PostMapping(value = "/{tournamentId}")
     public ResponseEntity<?> generate(@PathVariable Integer tournamentId,
                                       @RequestBody(required = false) GenerationRequest request) {
-        List<GenerationDto> generations = generationService.generate(tournamentId, request.getDuration(), request.getBetweenTime(), request.getEventDates());
+        List<GenerationDto> generations = generationService.generate(tournamentId, request.getDuration(), request.getBetweenTime(), request.getStartTime(),request.getEndTime());
         ResponseObject responseObject = new ResponseObject(true, generations.size(), generations);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
@@ -29,9 +35,9 @@ public class GenerationController {
 
     @PutMapping("/update")
     public ResponseEntity<?> updateGeneration(@RequestBody GenerationUpdateRequest generationUpdateRequest) {
-        List<GenerationDto> updatedGeneration=generationService.updateGeneration(generationUpdateRequest.getMatchDto(),
-                generationUpdateRequest.getEventDateIdSelected(), generationUpdateRequest.getStartTime(),generationUpdateRequest.getEndTime());
-        ResponseObject responseObject = new ResponseObject(true,updatedGeneration.size(),updatedGeneration);
+        List<GenerationDto> updatedGeneration = generationService.updateGeneration(generationUpdateRequest.getMatchId(),
+                generationUpdateRequest.getEventDateIdSelected(), generationUpdateRequest.getMatchOfNewTimeId());
+        ResponseObject responseObject = new ResponseObject(true, updatedGeneration.size(), updatedGeneration);
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 

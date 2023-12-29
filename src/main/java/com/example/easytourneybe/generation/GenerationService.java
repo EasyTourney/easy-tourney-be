@@ -5,15 +5,17 @@ import com.example.easytourneybe.eventdate.EventDateService;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
 import com.example.easytourneybe.generation.interfaces.IGenerationService;
 import com.example.easytourneybe.match.Match;
-import com.example.easytourneybe.match.MatchDto;
+import com.example.easytourneybe.match.dto.MatchDto;
 import com.example.easytourneybe.match.interfaces.IMatchService;
 import com.example.easytourneybe.team.Team;
 import com.example.easytourneybe.tournament.Tournament;
+import com.example.easytourneybe.tournament.TournamentRepository;
 import com.example.easytourneybe.tournament.TournamentService;
 import com.example.easytourneybe.util.MatchUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -28,26 +30,36 @@ public class GenerationService implements IGenerationService {
     @Autowired
     private MatchUtils matchUtils;
 
+    @Autowired
+    private TournamentRepository tournamentRepository;
+
     @Override
-    public List<GenerationDto> generate(Integer tournamentId, Integer duration, Integer betweenTime, List<EventDate> eventDateList) {
+    public List<GenerationDto> generate(Integer tournamentId, Integer duration, Integer betweenTime, LocalTime startTime, LocalTime endTime) {
         List<List<Team>> matches = matchService.matchList(tournamentId);
-        List<EventDate> eventDates;
+        List<EventDate> eventDates = eventDateService.findAllByTournamentId(tournamentId);
         Optional<Tournament> tournament = tournamentService.findById(tournamentId);
         if (tournament.isPresent()) {
             if (duration == null) {
                 duration = tournament.get().getMatchDuration();
+            } else {
+                tournament.get().setMatchDuration(duration);
             }
             if (betweenTime == null) {
                 betweenTime = tournament.get().getTimeBetween();
+            } else {
+                tournament.get().setTimeBetween(betweenTime);
             }
+            tournamentRepository.save(tournament.get());
         }
 
-        //If there are no changes in event dates from user, retrieve event dates from DB.
-        if (eventDateList == null) {
-            eventDates = eventDateService.findAllByTournamentId(tournamentId);
-        } else {
-            eventDates = new ArrayList<>(eventDateList);
+        //If there are changes , update its value.
+        if (startTime != null) {
+            eventDates.forEach(eventDate -> eventDate.setStartTime(startTime));
         }
+        if (endTime != null) {
+            eventDates.forEach(eventDate -> eventDate.setEndTime(endTime));
+        }
+
         if (eventDates.size() == 0) throw new InvalidRequestException("Event date is empty, please add them.");
         eventDateService.saveAll(eventDates);
 
@@ -67,59 +79,152 @@ public class GenerationService implements IGenerationService {
     }
 
     @Override
-    public List<GenerationDto> updateGeneration(MatchDto matchDto, Integer eventDateIdSelected, LocalTime startTime, LocalTime endTime) {
-        Match match = matchService.getMatchById(matchDto.getId());
-        List<Match> matchesOfEventDateSelected = matchService.getMatchByEventDateId(eventDateIdSelected);
-        List<Match> matchesOfEventDateChange = matchService.getMatchByEventDateId(match.getEventDateId());
-        Optional<EventDate> eventDateChange = eventDateService.findByEventDateId(matchDto.getEventDateId());
-        Optional<EventDate> eventDateSelected = eventDateService.findByEventDateId(eventDateIdSelected);
-        Optional<Tournament> tournament = tournamentService.findById(eventDateSelected.get().getTournamentId());
-        int matchesSelectedSize = matchesOfEventDateSelected.size();
-        int matchesChangeSize = matchesOfEventDateChange.size();
+    public List<GenerationDto> updateGeneration(Long matchId, Integer eventDateIdSelected, Long newPositionMatchId) {
+        List<GenerationDto> generations = new ArrayList<>();
+
+        //get Match by matchDtoId from DB
+        Match oldMatch = matchService.getMatchById(matchId);
+        Match matchOfNewTime = matchService.getMatchById(newPositionMatchId);
+        Match match = (Match) oldMatch.clone();
+
+        //get new and old event date objects
+        Optional<EventDate> oldEventDate = eventDateService.findByEventDateId(oldMatch.getEventDateId());
+        Optional<EventDate> newEventDate = eventDateService.findByEventDateId(eventDateIdSelected);
+
+        //cannot switch to a date in the past
+        if (newEventDate.get().getDate().isBefore(LocalDate.now())) {
+            throw new InvalidRequestException("Cannot switch to a date in the past.");
+        }
+
+        //get all match of event date new and event date old
+        List<Match> matchesOfNewEventDate = matchService.getMatchByEventDateId(eventDateIdSelected);
+        Integer indexOfNewTime = null;
+        if (matchOfNewTime != null) {
+            match.setStartTime(matchOfNewTime.getStartTime());
+            match.setEndTime(matchOfNewTime.getEndTime());
+            match.setEventDateId(eventDateIdSelected);
+            indexOfNewTime = matchesOfNewEventDate.indexOf(matchOfNewTime);
+        }
+
+        //get tournament to get between time and match duration
+        Optional<Tournament> tournament = tournamentService.findById(newEventDate.get().getTournamentId());
         int betweenTime = tournament.get().getTimeBetween();
         int duration = tournament.get().getMatchDuration();
+        LocalTime startTime = newEventDate.get().getStartTime();
+        List<List<Match>> matchesUpdated = new ArrayList<>();
 
-        for (int j = 0; j < matchesChangeSize; j++) {
-            if (Objects.equals(matchesOfEventDateChange.get(j).getStartTime(), startTime) && Objects.equals(matchesOfEventDateChange.get(j).getEndTime(), endTime)) {
-                updateTime(endTime, betweenTime, duration, matchesChangeSize, matchesOfEventDateChange, j);
-                break;
-            }
+        //Check for changes within a day or between two different days.
+        if (Objects.equals(oldMatch.getEventDateId(), eventDateIdSelected)) {
+            matchService.saveAll(updateInDate(match, duration, betweenTime, matchesOfNewEventDate, oldMatch, indexOfNewTime, matchOfNewTime));
+        } else {
+            matchesUpdated = updateTwoDifferentDays(match, duration, betweenTime, matchesOfNewEventDate, oldMatch, indexOfNewTime, matchOfNewTime, startTime, eventDateIdSelected);
+            matchService.saveAll(matchesUpdated.get(1));
+            List<MatchDto> matchDTOsOfOldEventDate = matchUtils.convertMatchListToMatchDtoList(matchService.getMatchByEventDateId(oldEventDate.get().getId()));
+            generations.add(matchUtils.createGeneration(oldEventDate, matchDTOsOfOldEventDate));
+            matchService.saveAll(matchesUpdated.get(0));
         }
 
 
-        for (int i = 0; i < matchesSelectedSize; i++) {
-            if (Objects.equals(matchesOfEventDateSelected.get(i).getStartTime(), startTime) && Objects.equals(matchesOfEventDateSelected.get(i).getEndTime(), endTime)) {
-                match.setStartTime(startTime);
-                match.setEndTime(endTime);
-                match.setEventDateId(eventDateIdSelected);
-                updateTime(endTime, betweenTime, duration, matchesSelectedSize, matchesOfEventDateSelected, i);
-                matchService.updateMatch(match);
-                break;
-            }
-        }
-
-
-        List<MatchDto> matchDTOsOfEventDateWillChange = matchUtils.convertMatchListToMatchDtoList(matchService.getMatchByEventDateId(matchDto.getEventDateId()));
-        List<MatchDto> matchDTOsOfEventDateAfterUpdated = matchUtils.convertMatchListToMatchDtoList(matchService.getMatchByEventDateId(eventDateIdSelected));
-
-        List<GenerationDto> generations = new ArrayList<>();
-        generations.add(matchUtils.createGeneration(eventDateSelected, matchDTOsOfEventDateAfterUpdated));
-        generations.add(matchUtils.createGeneration(eventDateChange, matchDTOsOfEventDateWillChange));
-
+        List<MatchDto> matchDTOsOfNewEventDate = matchUtils.convertMatchListToMatchDtoList(matchService.getMatchByEventDateId(eventDateIdSelected));
+        generations.add(matchUtils.createGeneration(newEventDate, matchDTOsOfNewEventDate));
         return generations;
     }
 
+    @Override
+    public List<GenerationDto> getAllGeneration(Integer tournamentId) {
+        List<EventDate> eventDates = eventDateService.findAllByTournamentId(tournamentId);
+        List<GenerationDto> generations = new ArrayList<>();
+        eventDates.sort(Comparator.comparing(EventDate::getDate));
+        for (EventDate eventDate : eventDates) {
+            List<MatchDto> matches = matchUtils.convertMatchListToMatchDtoList(matchService.getMatchByEventDateId(eventDate.getId()));
+            generations.add(matchUtils.createGeneration(Optional.of(eventDate), matches));
+        }
+        return generations;
+    }
 
-    public void updateTime(LocalTime endTime, Integer betweenTime, Integer duration, Integer matchesSize, List<Match> matchList, int i) {
+    public List<Match> updateInDate(Match match, Integer duration, Integer betweenTime, List<Match> matchesOfNewEventDate, Match oldMatch, Integer indexOfNewTime, Match matchOfNewTime) {
+        //Changes within a day.
+        LocalTime endTime;
+        List<Match> matchesNew = new ArrayList<>();
+        //Find the position of oldMatch in list.
+        int indexOfOldMatch = matchesOfNewEventDate.indexOf(oldMatch);
+        //remove oldMatch from list
+        matchesOfNewEventDate.remove(oldMatch);
+        //Adjust the timing of matches after the changes.
+        if (indexOfOldMatch < indexOfNewTime) {
+            endTime = oldMatch.getStartTime().minusMinutes(betweenTime);
+            matchesNew = updateTime(endTime, betweenTime, duration, matchesOfNewEventDate.subList(indexOfOldMatch, indexOfNewTime).size() + indexOfOldMatch, matchesOfNewEventDate, indexOfOldMatch);
+        } else if (indexOfNewTime < indexOfOldMatch) {
+            endTime = matchOfNewTime.getEndTime();
+            matchesNew = updateTime(endTime, betweenTime, duration, matchesOfNewEventDate.subList(indexOfNewTime, indexOfOldMatch).size() + indexOfNewTime, matchesOfNewEventDate, indexOfNewTime);
+        }
+        matchesNew.add(indexOfNewTime, match);
+
+        return matchesNew;
+    }
+
+
+    public List<List<Match>> updateTwoDifferentDays(Match match, Integer duration, Integer betweenTime,
+                                                    List<Match> matchesOfNewEventDate, Match oldMatch, Integer indexOfNewTime, Match matchOfNewTime, LocalTime startTime,
+                                                    Integer eventDateIdSelected) {
+        //change the time between two different days.
+        List<Match> matchesOfOldEventDate = matchService.getMatchByEventDateId(oldMatch.getEventDateId());
+
+        int matchesNewEventDateSize = matchesOfNewEventDate.size();
+        int matchesOldEventDateSize = matchesOfOldEventDate.size();
+
+        List<Match> matchesNew = new ArrayList<>();
+        List<Match> matchesOld;
+        List<List<Match>> matchesUpdated = new ArrayList<>();
+
+        int indexOfOldTime = matchesOfOldEventDate.indexOf(oldMatch);
+
+        //update matches in new event date
+        //In case of changing the time slot beyond the last element of the array.
+        if (matchOfNewTime == null) {
+            //if the match is moved to an event date where no matches have taken place yet
+            if (matchesNewEventDateSize == 0) {
+                match.setStartTime(startTime);
+                match.setEndTime(startTime.plusMinutes(duration));
+                match.setEventDateId(eventDateIdSelected);
+                matchesNew.add(match);
+            } else {
+                //If the match is changed to the last position of the event date
+                LocalTime newStartTime = matchesOfNewEventDate.get(matchesNewEventDateSize - 1).getEndTime().plusMinutes(betweenTime);
+                match.setStartTime(newStartTime);
+                match.setEndTime(newStartTime.plusMinutes(duration));
+                match.setEventDateId(matchesOfNewEventDate.get(matchesNewEventDateSize - 1).getEventDateId());
+                matchesNew.addAll(matchesOfNewEventDate);
+                matchesNew.add(match);
+            }
+
+        } else {
+            matchesNew = updateTime(matchOfNewTime.getEndTime(), betweenTime, duration, matchesNewEventDateSize, matchesOfNewEventDate, indexOfNewTime);
+            matchesNew.add(indexOfNewTime, match);
+        }
+
+        matchesOfOldEventDate.remove(oldMatch);
+        LocalTime endTime = oldMatch.getStartTime().minusMinutes(betweenTime);
+        matchesOld = updateTime(endTime, betweenTime, duration, matchesOldEventDateSize - 1, matchesOfOldEventDate, indexOfOldTime);
+
+        matchesUpdated.add(0, matchesNew);
+        matchesUpdated.add(1, matchesOld);
+
+        return matchesUpdated;
+    }
+
+
+    //Update the time when modifying the schedule of a match.
+    private List<Match> updateTime(LocalTime endTime, Integer betweenTime, Integer duration, Integer matchesSize, List<Match> matchList, int index) {
         LocalTime start = endTime.plusMinutes(betweenTime);
         LocalTime end = start.plusMinutes(duration);
-        for (int j = i; j < matchesSize; j++) {
+        for (int j = index; j < matchesSize; j++) {
             matchList.get(j).setStartTime(start);
             matchList.get(j).setEndTime(end);
-            matchService.updateMatch(matchList.get(j));
             start = end.plusMinutes(betweenTime);
             end = start.plusMinutes(duration);
         }
+        return matchList;
     }
 
 }

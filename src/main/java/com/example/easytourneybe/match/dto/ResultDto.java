@@ -1,5 +1,6 @@
-package com.example.easytourneybe.match;
+package com.example.easytourneybe.match.dto;
 
+import com.example.easytourneybe.match.Match;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

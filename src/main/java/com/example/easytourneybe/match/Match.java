@@ -51,4 +51,21 @@ public class Match {
     @Column(name = "type", columnDefinition = "types")
     @Enumerated(EnumType.STRING)
     private TypeMatch type;
+
+
+    public Object clone()  {
+        Match match=new Match();
+        match.setId(this.id);
+        match.setStartTime(this.startTime);
+        match.setEndTime(this.endTime);
+        match.setTeamOneId(this.teamOneId);
+        match.setTeamTwoId(this.teamTwoId);
+        match.setMatchDuration(this.matchDuration);
+        match.setTeamOneResult(this.teamOneResult);
+        match.setTeamTwoResult(this.teamTwoResult);
+        match.setEventDateId(this.eventDateId);
+        match.setTitle(this.title);
+        match.setType(this.type);
+        return match;
+    }
 }

@@ -1,4 +1,4 @@
-package com.example.easytourneybe.match;
+package com.example.easytourneybe.match.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

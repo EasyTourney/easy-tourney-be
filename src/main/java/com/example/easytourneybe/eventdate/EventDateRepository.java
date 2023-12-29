@@ -29,7 +29,5 @@ public interface EventDateRepository extends JpaRepository<EventDate, Integer> {
     @Query(value = "DELETE FROM event_date e WHERE e.id = :eventDateId", nativeQuery = true)
     void deleteByEventDateId(Integer eventDateId);
 
-
-
     Optional<EventDate> findById(Integer eventDateId);
 }

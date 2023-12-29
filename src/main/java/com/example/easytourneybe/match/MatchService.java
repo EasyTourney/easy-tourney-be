@@ -2,18 +2,29 @@ package com.example.easytourneybe.match;
 
 import com.example.easytourneybe.enums.match.TypeMatch;
 import com.example.easytourneybe.eventdate.dto.EventDate;
+import com.example.easytourneybe.eventdate.EventDateService;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
+import com.example.easytourneybe.match.dto.LeaderBoardDto;
+import com.example.easytourneybe.match.dto.MatchDto;
+import com.example.easytourneybe.match.dto.MatchOfLeaderBoardDto;
+import com.example.easytourneybe.match.dto.ResultDto;
+import com.example.easytourneybe.generation.GenerationDto;
+import com.example.easytourneybe.match.dto.ResponseChangeMatch;
 import com.example.easytourneybe.match.interfaces.IMatchRepository;
 import com.example.easytourneybe.match.interfaces.IMatchService;
 import com.example.easytourneybe.team.Team;
 import com.example.easytourneybe.team.TeamService;
+import com.example.easytourneybe.tournament.TournamentRepository;
 import com.example.easytourneybe.util.MatchUtils;
+import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,6 +35,9 @@ import java.util.List;
 public class MatchService implements IMatchService {
 
     @Autowired
+    private TournamentRepository tournamentRepository;
+
+    @Autowired
     private TeamService teamService;
 
     @Autowired
@@ -31,6 +45,9 @@ public class MatchService implements IMatchService {
 
     @Autowired
     private MatchUtils matchUtils;
+
+    @Autowired
+    private EventDateService eventDateService;
 
     @Override
     public List<List<Team>> matchList(Integer idTournament) {
@@ -94,20 +111,23 @@ public class MatchService implements IMatchService {
             LocalTime endMatch = eventDates.get(i).getStartTime().plusMinutes(duration);
             LocalTime endDate = LocalTime.of(23, 59, 59);
             List<List<LocalTime>> times = new ArrayList<>();
-            if (numMatch % numEvent >= timeSheetEachEventDate) {
+            if (numMatch % numEvent >= numEvent) {
                 timeSheetEachEventDate++;
             }
             int j = 0;
+            LocalDateTime thisEventDate = LocalDateTime.of(eventDates.get(i).getDate(), endDate);
+            LocalDateTime checkDateTime = LocalDateTime.of(eventDates.get(i).getDate(), startMatch);
 
             //Ensure that the time slots fall within the allowed time range for each event date.
             while (startMatch.isBefore(eventDates.get(i).getEndTime()) && endMatch.isBefore(eventDates.get(i).getEndTime())
-                    && j < timeSheetEachEventDate&& startMatch.isBefore(endDate) && endMatch.isBefore(endDate)) {
+                    && j < timeSheetEachEventDate && startMatch.isBefore(endDate) && endMatch.isBefore(endDate)) {
                 List<LocalTime> matchTime = new ArrayList<>(2);
                 matchTime.add(startMatch);
                 matchTime.add(endMatch);
                 times.add(matchTime);
                 startMatch = endMatch.plusMinutes(betweenTime);
                 endMatch = startMatch.plusMinutes(duration);
+                checkDateTime = checkDateTime.plusMinutes(betweenTime);
                 numMatch--;
                 j++;
             }
@@ -140,9 +160,10 @@ public class MatchService implements IMatchService {
         List<Match> matchList = new ArrayList<>();
         List<MatchDto> matchDTOs;
         int j = 0;
-
+        int duration;
         //Combine the matches and match times together.
         for (Map.Entry<EventDate, List<List<LocalTime>>> entry : schedule.entrySet()) {
+            duration = tournamentRepository.findById(entry.getKey().getTournamentId()).get().getMatchDuration();
             for (int i = 0; i < entry.getValue().size(); i++, j++) {
                 Match match = new Match();
                 List<LocalTime> times = entry.getValue().get(i);
@@ -151,6 +172,7 @@ public class MatchService implements IMatchService {
                 match.setEndTime(times.get(1));
                 match.setTeamOneId(matches.get(j).get(0).getTeamId());
                 match.setTeamTwoId(matches.get(j).get(1).getTeamId());
+                match.setMatchDuration(duration);
                 match.setType(TypeMatch.MATCH);
                 matchList.add(match);
             }
@@ -171,17 +193,207 @@ public class MatchService implements IMatchService {
 
     @Override
     public Match getMatchById(Long matchId) {
-        return matchRepository.getMatchByIdIs(matchId);
+        return matchRepository.getById(matchId);
     }
 
-    @Override
-    public void updateMatch(Match match) {
-        matchRepository.save(match);
-    }
 
     @Override
     public List<Match> getMatchByEventDateId(Integer eventDateId) {
         return matchRepository.getAllByEventDateId(eventDateId);
+    }
+
+
+    @Override
+    public void saveAll(List<Match> matches) {
+        matchRepository.saveAll(matches);
+    }
+    @Override
+    @Transactional
+    public List<GenerationDto> dragAndDropMatch(Integer matchId, Integer newEventDateId, Integer newIndexOfMatch) {
+        Match match = matchRepository.findById(matchId).get();
+        EventDate oldEventDate = eventDateService.findByEventDateId(match.getEventDateId()).get();
+        EventDate newEventDate = eventDateService.findByEventDateId(newEventDateId).get();
+
+        if (match.getStartTime().isBefore(LocalTime.now()) && oldEventDate.getDate().compareTo(LocalDate.now()) <= 0)
+            throw new InvalidRequestException("Can not change match in the past");
+
+        List<GenerationDto> response = null;
+        if (oldEventDate.getDate().equals(newEventDate.getDate())) {
+            response = dragAndDropMatchInDate(match, oldEventDate, newIndexOfMatch);
+        } else {
+            if (newEventDate.getDate().isBefore(LocalDate.now()))
+                throw new InvalidRequestException("Can not change match to the past");
+            response = dragAndDropMatchBetweenDate(match, oldEventDate, newEventDate, newIndexOfMatch);
+        }
+        return response;
+    }
+
+
+    private List<GenerationDto> dragAndDropMatchInDate(Match match, EventDate eventDate, Integer newIndexOfMatch) {
+
+        List<Match> matches = matchRepository.findAllByEventDateId(match.getEventDateId());
+
+        boolean isAddNewMatchInDate = false;
+        boolean isRemoveMatchInDate = false;
+        Integer newEventDateId = null;
+        matches = changeTimeMatchInDate(match, matches,
+                                        newIndexOfMatch, newEventDateId,
+                                        isAddNewMatchInDate, isRemoveMatchInDate);
+
+        matchRepository.saveAll(matches);
+
+        //sort by start time and return
+        matches = matches.stream().sorted(Comparator.comparing(Match::getStartTime)).collect(Collectors.toList());
+        List<GenerationDto> result = new ArrayList<>();
+
+        result.add(GenerationDto.builder()
+                .eventDateId(eventDate.getId())
+                .matches(matchUtils.convertMatchToMatchDto(matches))
+                .date(eventDate.getDate())
+                .startTime(eventDate.getStartTime())
+                .endTime(eventDate.getEndTime())
+                .build()
+        );
+
+        return result;
+    }
+
+    private List<GenerationDto> dragAndDropMatchBetweenDate(Match match, EventDate oldEventDate, EventDate newEventDate, Integer newIndexOfMatch) {
+        /*
+         Change all match in OldEventDate
+        */
+        List<Match> oldEventDateMatches = matchRepository.findAllByEventDateId(oldEventDate.getId());
+        boolean isRemoveMatchInDate = true;
+        boolean isAddNewMatchInDate = false;
+        oldEventDateMatches = changeTimeMatchInDate(match, oldEventDateMatches,
+                                                    newIndexOfMatch, newEventDate.getId(),
+                                                    isAddNewMatchInDate, isRemoveMatchInDate);
+        matchRepository.saveAll(oldEventDateMatches);
+
+        /*
+         change all match in newEventDate
+        */
+        List<Match> newEventDateMatches = matchRepository.findAllByEventDateId(newEventDate.getId());
+        isRemoveMatchInDate = false;
+        isAddNewMatchInDate = true;
+        newEventDateMatches = changeTimeMatchInDate(match, newEventDateMatches,
+                                                    newIndexOfMatch, newEventDate.getId(),
+                                                    isAddNewMatchInDate, isRemoveMatchInDate);
+        matchRepository.saveAll(newEventDateMatches);
+
+
+
+        List<GenerationDto> result = new ArrayList<>();
+        //sort by start time and return
+        newEventDateMatches = newEventDateMatches.stream().sorted(Comparator.comparing(Match::getStartTime)).collect(Collectors.toList());
+        oldEventDateMatches = oldEventDateMatches.stream().sorted(Comparator.comparing(Match::getStartTime)).collect(Collectors.toList());
+
+        result.add(
+                GenerationDto.builder()
+                        .eventDateId(oldEventDate.getId())
+                        .date(oldEventDate.getDate())
+                        .startTime(oldEventDate.getStartTime())
+                        .endTime(oldEventDate.getEndTime())
+                        .matches(matchUtils.convertMatchToMatchDto(oldEventDateMatches))
+                        .build()
+        );
+
+        result.add(
+                GenerationDto.builder()
+                        .eventDateId(newEventDate.getId())
+                        .date(newEventDate.getDate())
+                        .startTime(newEventDate.getStartTime())
+                        .endTime(newEventDate.getEndTime())
+                        .matches(matchUtils.convertMatchToMatchDto(newEventDateMatches))
+                        .build()
+        );
+        return result;
+    }
+
+    private List<Match> changeTimeMatchInDate(Match match, List<Match> matchesInDate,
+                                              Integer newIndexOfMatch, Integer newEventDateId,
+                                              boolean isAddNewMatchInDate, boolean isRemoveMatchInDate) {
+        // sort match by time
+        matchesInDate = matchesInDate.stream().sorted(Comparator.comparing(Match::getStartTime)).collect(Collectors.toList());
+
+        Integer oldIndex = null;
+        if (!isAddNewMatchInDate)
+            oldIndex = matchesInDate.indexOf(matchesInDate.stream().filter(eachMatch -> eachMatch.getId().equals(match.getId())).findFirst().get());
+
+        int duration = match.getMatchDuration();
+        int betweenTime = 10;
+        int timeChange = duration + betweenTime;
+        LocalTime newStartTime = null;
+        LocalTime newEndTime = null;
+        int timeDifference = 0;
+        if (!isAddNewMatchInDate && !isRemoveMatchInDate) {
+            if (oldIndex < newIndexOfMatch) {
+                for (int index = oldIndex + 1; index < newIndexOfMatch; index++) {
+                    Match eachMatch = matchesInDate.get(index);
+                    newStartTime = eachMatch.getStartTime();
+                    newEndTime = eachMatch.getEndTime();
+                    timeDifference = duration - eachMatch.getMatchDuration();
+                    eachMatch.setEndTime(newEndTime.minusMinutes(timeChange));
+                    eachMatch.setStartTime(newStartTime.minusMinutes(timeChange));
+                    matchesInDate.set(index, eachMatch);
+                }
+                match.setStartTime(newStartTime.minusMinutes(timeDifference));
+                match.setEndTime(match.getStartTime().plusMinutes(duration));
+                matchesInDate.set(oldIndex, match);
+            } else {
+                for (int index = oldIndex - 1; index >= newIndexOfMatch - 1; index--) {
+                    Match eachMatch = matchesInDate.get(index);
+                    newStartTime = eachMatch.getStartTime();
+                    newEndTime = eachMatch.getEndTime();
+                    eachMatch.setEndTime(newEndTime.plusMinutes(timeChange));
+                    eachMatch.setStartTime(newStartTime.plusMinutes(timeChange));
+                    matchesInDate.set(index, eachMatch);
+                }
+                match.setStartTime(newStartTime.minusMinutes(timeDifference));
+                match.setEndTime(match.getStartTime().plusMinutes(duration));
+                matchesInDate.set(oldIndex, match);
+            }
+        }
+
+        if (isRemoveMatchInDate) {
+            for (int index = oldIndex + 1; index < matchesInDate.size(); index++) {
+                Match eachMatch = matchesInDate.get(index);
+                newStartTime = eachMatch.getStartTime();
+                newEndTime = eachMatch.getEndTime();
+                eachMatch.setEndTime(newEndTime.minusMinutes(timeChange));
+                eachMatch.setStartTime(newStartTime.minusMinutes(timeChange));
+                matchesInDate.set(index, eachMatch);
+            }
+            matchesInDate.remove(oldIndex);
+        }
+
+        if (isAddNewMatchInDate) {
+            boolean isAddToTheEnd = true;
+            for (int index = matchesInDate.size() - 1; index >= newIndexOfMatch - 1; index--) {
+                Match eachMatch = matchesInDate.get(index);
+                newStartTime = eachMatch.getStartTime();
+                newEndTime = eachMatch.getEndTime();
+                eachMatch.setEndTime(newEndTime.plusMinutes(timeChange));
+                eachMatch.setStartTime(newStartTime.plusMinutes(timeChange));
+                if (eachMatch.getEndTime().isBefore(newEndTime))
+                    throw new InvalidRequestException("Not enough time to schedule");
+                matchesInDate.set(index, eachMatch);
+                isAddToTheEnd = false;
+            }
+            if (isAddToTheEnd) {
+                if (matchesInDate.isEmpty())
+                    newStartTime = eventDateService.findByEventDateId(newEventDateId).get().getStartTime();
+                else
+                    newStartTime = matchesInDate.get(matchesInDate.size() - 1).getEndTime().plusMinutes(betweenTime);
+            }
+
+            match.setStartTime(newStartTime.minusMinutes(timeDifference));
+            match.setEndTime(match.getStartTime().plusMinutes(duration));
+            match.setEventDateId(newEventDateId);
+            matchesInDate.add(match);
+        }
+
+        return matchesInDate;
     }
 
     public boolean isHaveMatchInDate(Integer eventDateId) {
@@ -225,17 +437,17 @@ public class MatchService implements IMatchService {
     }
 
     public List<ResultDto> getAllResult(Integer tournamentId) {
-        List<Object[]> match= matchRepository.getAllResult(tournamentId);
+        List<Object[]> match = matchRepository.getAllResult(tournamentId);
         return processArrayData(match);
     }
 
-    public Match updateMatch(Integer tournamentId,Integer matchID, Integer teamOneResult, Integer teamTwoResult) {
+    public Match updateMatch(Integer tournamentId, Integer matchID, Integer teamOneResult, Integer teamTwoResult) {
         checkMatchInTournament(tournamentId, matchID);
-        Match match=matchRepository.findById(matchID).orElseThrow(()->new NoSuchElementException("Match not found")) ;
-        if (teamOneResult==null || teamTwoResult==null) {
+        Match match = matchRepository.findById(matchID).orElseThrow(() -> new NoSuchElementException("Match not found"));
+        if (teamOneResult == null || teamTwoResult == null) {
             throw new InvalidRequestException("Result must not be null");
         }
-        if (teamOneResult<0 || teamTwoResult<0) {
+        if (teamOneResult < 0 || teamTwoResult < 0) {
             throw new InvalidRequestException("Result must be equal to 0 or greater than 0");
         }
         match.setTeamOneResult(teamOneResult);

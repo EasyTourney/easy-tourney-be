@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 import static com.example.easytourneybe.util.TimeValidateUtils.ParseStringToTime;
 
+
 @Service
 public class EventDateService {
 
@@ -67,4 +68,5 @@ public class EventDateService {
         eventDate.setUpdatedAt(LocalDateTime.now());
         return eventDateRepository.save(eventDate);
     }
+
 }

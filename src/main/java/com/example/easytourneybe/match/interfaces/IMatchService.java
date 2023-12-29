@@ -1,9 +1,12 @@
 package com.example.easytourneybe.match.interfaces;
 
 import com.example.easytourneybe.eventdate.dto.EventDate;
+import com.example.easytourneybe.generation.GenerationDto;
 import com.example.easytourneybe.match.Match;
-import com.example.easytourneybe.match.MatchDto;
-import com.example.easytourneybe.match.*;
+import com.example.easytourneybe.match.dto.LeaderBoardDto;
+import com.example.easytourneybe.match.dto.MatchDto;
+import com.example.easytourneybe.match.dto.MatchOfLeaderBoardDto;
+import com.example.easytourneybe.match.dto.ResponseChangeMatch;
 import com.example.easytourneybe.team.Team;
 
 import java.time.LocalTime;
@@ -19,12 +22,16 @@ public interface IMatchService {
 
     Match getMatchById(Long matchId);
 
-    void updateMatch(Match match);
 
     List<Match> getMatchByEventDateId(Integer eventDateId);
+
 
     List<LeaderBoardDto> getLeaderBoardByTournamentId(Integer tournamentId);
 
     List<MatchOfLeaderBoardDto> getMatchOfLeaderBoardByTournamentId(Integer tournamentId);
 
+    void saveAll(List<Match> matches);
+
+
+    List<GenerationDto> dragAndDropMatch(Integer matchId, Integer newEventDateId, Integer newIndexOfMatch);
 }

@@ -4,12 +4,13 @@ import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.enums.match.TypeMatch;
 import com.example.easytourneybe.generation.GenerationDto;
 import com.example.easytourneybe.match.Match;
-import com.example.easytourneybe.match.MatchDto;
+import com.example.easytourneybe.match.dto.MatchDto;
 
 import com.example.easytourneybe.team.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -73,11 +74,14 @@ public class MatchUtils {
         for (EventDate eventDate : eventDates) {
             LocalTime startMatch = eventDate.getStartTime();
             LocalTime endMatch = eventDate.getStartTime().plusMinutes(duration);
+            LocalDateTime thisEventDate = LocalDateTime.of(eventDate.getDate(), endDate);
+            LocalDateTime checkDateTime = LocalDateTime.of(eventDate.getDate(), startMatch);
             Integer countTime = 0;
-            while (startMatch.isBefore(eventDate.getEndTime()) && endMatch.isBefore(eventDate.getEndTime()) && startMatch.isBefore(endDate) && endMatch.isBefore(endDate)) {
+            while (startMatch.isBefore(eventDate.getEndTime()) && endMatch.isBefore(eventDate.getEndTime()) && checkDateTime.isBefore(thisEventDate)) {
                 countTime++;
                 startMatch = endMatch.plusMinutes(betweenTime);
                 endMatch = startMatch.plusMinutes(duration);
+                checkDateTime = checkDateTime.plusMinutes(betweenTime);
             }
             numberOfTimeEachEvent.put(eventDate, countTime);
         }

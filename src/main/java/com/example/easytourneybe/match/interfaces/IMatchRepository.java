@@ -1,8 +1,8 @@
 package com.example.easytourneybe.match.interfaces;
 
-import com.example.easytourneybe.match.LeaderBoardDto;
+import com.example.easytourneybe.match.dto.LeaderBoardDto;
 import com.example.easytourneybe.match.Match;
-import com.example.easytourneybe.match.MatchOfLeaderBoardDto;
+import com.example.easytourneybe.match.dto.MatchOfLeaderBoardDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -42,9 +42,16 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
             AND ed.tournament_id = :tournamentId""", nativeQuery = true)
     void deleteMatchByTournamentId(Integer tournamentId);
 
+
+    @Query(value = """
+            SELECT m.*
+            FROM match m
+            WHERE m.event_date_id = :eventDateId
+            ORDER BY m.start_time
+            """,nativeQuery = true)
     List<Match> getAllByEventDateId(Integer eventDateId);
 
-    Match getMatchByIdIs(Long matchId);
+    Match getById(Long matchId);
 
 
     @Query(value = """
@@ -72,7 +79,7 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
     List<Match> findAllByEventDateId(Integer eventDateId);
 
     @Query(value = """
-                SELECT NEW com.example.easytourneybe.match.LeaderBoardDto(t.teamId, t.teamName, t.score,
+                SELECT NEW com.example.easytourneybe.match.dto.LeaderBoardDto(t.teamId, t.teamName, t.score,
                 SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamOneResult ELSE m.teamTwoResult END)
                 - SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamTwoResult ELSE m.teamOneResult END) AS the_diff,
                 SUM(CASE WHEN t.teamId = m.teamOneId THEN m.teamOneResult ELSE m.teamTwoResult END) AS total_result,
@@ -90,7 +97,7 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
     List<LeaderBoardDto> getLeaderBoard(Integer tournamentId);
 
     @Query(value = """
-                SELECT NEW com.example.easytourneybe.match.MatchOfLeaderBoardDto(m.id, m.teamOneId,
+                SELECT NEW com.example.easytourneybe.match.dto.MatchOfLeaderBoardDto(m.id, m.teamOneId,
                     t1.teamName,
                     m.teamTwoId,
                     t2.teamName,

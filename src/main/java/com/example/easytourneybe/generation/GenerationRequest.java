@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Data
@@ -13,5 +14,7 @@ import java.util.List;
 public class GenerationRequest {
     private Integer duration;
     private Integer betweenTime;
-    private List<EventDate> eventDates;
+    private LocalTime startTime;
+    private LocalTime endTime;
+
 }

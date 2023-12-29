@@ -1,4 +1,4 @@
-package com.example.easytourneybe.match;
+package com.example.easytourneybe.match.dto;
 
 import com.example.easytourneybe.enums.match.TypeMatch;
 import com.example.easytourneybe.team.Team;
@@ -11,6 +11,7 @@ import java.time.LocalTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class MatchDto {
     private Long id;
     private Team teamOne;
