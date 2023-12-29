@@ -393,7 +393,7 @@ public class MatchService implements IMatchService {
             match.setStartTime(newStartTime.minusMinutes(timeDifference));
             match.setEndTime(match.getStartTime().plusMinutes(duration));
             match.setEventDateId(newEventDateId);
-            if (match.getStartTime().isBefore(LocalTime.now()))
+            if (match.getStartTime().isBefore(LocalTime.now()) && newEventDateOpt.get().getDate().compareTo(LocalDate.now()) <= 0)
                 throw new InvalidRequestException("Can not move Match or Event to the past.");
             matchesInDate.add(match);
         }
