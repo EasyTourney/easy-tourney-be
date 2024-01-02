@@ -1,6 +1,7 @@
 package com.example.easytourneybe.eventdate;
 
 import com.example.easytourneybe.eventdate.dto.EventDate;
+import com.example.easytourneybe.eventdate.dto.EventDateAdditionalDto;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,6 +68,10 @@ public class EventDateService {
         eventDate.setEndTime(endTimeValid);
         eventDate.setUpdatedAt(LocalDateTime.now());
         return eventDateRepository.save(eventDate);
+    }
+
+    public List<EventDateAdditionalDto> findAllEventDatesAndCountMatch(Integer tournamentId) {
+        return eventDateRepository.findAllEventDatesAndCountMatch(tournamentId);
     }
 
 }

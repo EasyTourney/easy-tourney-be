@@ -149,6 +149,7 @@ public class TournamentRepositoryCustomImpl implements TournamentRepositoryCusto
                 .data(tournamentGeneralDto)
                 .success(true)
                 .total(1)
+                .additionalData(Map.of("matchOfEventDates", eventDateService.findAllEventDatesAndCountMatch(tournament_id)))
                 .build();
     }
 }

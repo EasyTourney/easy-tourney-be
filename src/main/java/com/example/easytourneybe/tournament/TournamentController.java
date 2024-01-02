@@ -77,12 +77,11 @@ public class TournamentController {
         );
     }
 
-    @PutMapping("/{tournamentId}/status")
-    public ResponseEntity<ResponseObject> updateTournamentStatus(
-            @PathVariable Integer tournamentId,
-            @Valid @RequestBody StatusRequest status
+    @PutMapping("/{tournamentId}/discard")
+    public ResponseEntity<ResponseObject> discardTournament(
+            @PathVariable Integer tournamentId
     ) {
-        tournamentService.updateTournamentStatus(tournamentId, status);
+        tournamentService.discardTournament(tournamentId);
         ResponseObject responseObject = ResponseObject.builder().total(1).success(true).build();
         return ResponseEntity.status(HttpStatus.OK).body(
                 responseObject

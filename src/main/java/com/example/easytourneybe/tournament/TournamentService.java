@@ -45,7 +45,7 @@ public class TournamentService {
     private UserService userService;
 
     @Autowired
-    TeamService teamService ;
+    TeamService teamService;
 
     @Autowired
     private EventDateService eventDateService;
@@ -64,6 +64,7 @@ public class TournamentService {
 
     private final String INSERT_INTO_TOURNAMENT_ORGANIZER_TABLE =
             "INSERT INTO organizer_tournament(user_id, tournament_id) VALUES (:userId, :tournamentId)";
+
     public ResponseObject getAll(Integer page, Integer pageSize, String field, String sortType, TournamentStatus status, String search, Integer categoryId) {
         search = search.replaceAll("%", "\\\\%");
         search = search.replaceAll("_", "\\\\_");
@@ -74,9 +75,9 @@ public class TournamentService {
             if (UserRole.ORGANIZER.name().equals(o.toString())) isOrganizer = true;
         }
         ResponseObject results;
-        if(isAdmin) {
+        if (isAdmin) {
             results = tournamentRepository.findAllByUserId(null, page, pageSize, sortType, field, status, search, categoryId);
-       } else if (isOrganizer) {
+        } else if (isOrganizer) {
             Integer userId = userService.findByEmail(authentication.getName()).getId();
             results = tournamentRepository.findAllByUserId(userId, page, pageSize, sortType, field, status, search, categoryId);
         } else {
@@ -84,6 +85,7 @@ public class TournamentService {
         }
         return results;
     }
+
     public Optional<Tournament> deleteTournament(Integer id) {
         Optional<Tournament> foundTournament = tournamentRepository.findTournamentByIdAndIsDeletedFalse(id);
         if (foundTournament.isPresent()) {
@@ -113,7 +115,8 @@ public class TournamentService {
                 throw new InvalidRequestException("Can not add a date in the past.");
         });
         Optional<Category> categoryOpt = categoryService.findCategoryById(Long.valueOf(categoryId));
-        if (!categoryOpt.isPresent() || categoryOpt.get().isDeleted()) throw  new NoSuchElementException("category not found with id: " + categoryId);
+        if (!categoryOpt.isPresent() || categoryOpt.get().isDeleted())
+            throw new NoSuchElementException("category not found with id: " + categoryId);
         Integer defaultMatchDuration = 60;
         Tournament tournament = Tournament.builder().title(title).categoryId(categoryId)
                 .description(desc)
@@ -129,7 +132,7 @@ public class TournamentService {
                 return EventDate.builder().tournamentId(tournamentId)
                         .date(date)
                         .startTime(LocalTime.MIN)
-                        .endTime(LocalTime.of(23,59,59))
+                        .endTime(LocalTime.of(23, 59, 59))
                         .build();
             }).toList();
         }
@@ -172,17 +175,9 @@ public class TournamentService {
             List<EventDate> eventDates = eventDateService.findAllByTournamentId(tournamentId);
             if (allowedResetAllEventDate.contains(tournament.getStatus())) {
                 eventDateService.deleteAllByTournamentId(tournamentId);
-                eventDateService.saveAll(tournamentUpdateDto.getEventDates().stream().map(date -> EventDate.builder()
-                        .tournamentId(tournamentId)
-                        .date(date)
-                        .startTime(LocalTime.MIN)
-                        .endTime(LocalTime.of(23, 59, 59))
-                        .build()).toList());
             } else {
-
                 for (EventDate eventDate : eventDates) {
                     LocalDate date = eventDate.getDate();
-
                     // If event date from database is not in request return -> delete it
                     if (!tournamentUpdateDto.getEventDates().contains(date)) {
                         if (!DateValidatorUtils.isAfterToday(date)) {
@@ -194,18 +189,21 @@ public class TournamentService {
                         }
                     } else {
                         // If event date from database is in request -> remove it from list
-                        tournamentUpdateDto.getEventDates().remove(date);
+                        tournamentUpdateDto.setEventDates(tournamentUpdateDto.getEventDates().stream()
+                                .filter(eventDate1 -> !eventDate1.equals(date)).toList());
                     }
                 }
-
-                // Save all event dates from list that is not in database
-                eventDateService.saveAll(tournamentUpdateDto.getEventDates().stream().map(date -> EventDate.builder()
-                        .tournamentId(tournamentId)
-                        .date(date)
-                        .startTime(LocalTime.MIN)
-                        .endTime(LocalTime.of(23, 59, 59))
-                        .build()).toList());
             }
+            if (tournamentUpdateDto.getEventDates().stream().anyMatch(DateValidatorUtils::isBeforeToday)) {
+                throw new InvalidRequestException("Cannot add event date that is before today");
+            }
+
+            eventDateService.saveAll(tournamentUpdateDto.getEventDates().stream().map(date -> EventDate.builder()
+                    .tournamentId(tournamentId)
+                    .date(date)
+                    .startTime(LocalTime.MIN)
+                    .endTime(LocalTime.of(23, 59, 59))
+                    .build()).toList());
         }
     }
 
@@ -218,10 +216,15 @@ public class TournamentService {
                 tournamentUpdateDto.getDescription() :
                 tournament.getDescription());
 
-        tournament.setCategoryId((tournamentUpdateDto.getCategoryId() != null && allowedAdvance.contains(tournament.getStatus())) ?
-                categoryService.findCategoryById(Long.valueOf(tournamentUpdateDto.getCategoryId()))
-                        .orElseThrow(() -> new NoSuchElementException("Category not found")).getCategoryId().intValue() :
-                tournament.getCategoryId());
+        //If not allow edit throw exception
+        if (!allowedAdvance.contains(tournament.getStatus()) && tournamentUpdateDto.getCategoryId() != null) {
+            throw new InvalidRequestException("Cannot update category of tournament");
+        }
+
+        tournament.setCategoryId(tournamentUpdateDto.getCategoryId() != null
+                ? categoryService.findCategoryById(Long.valueOf(tournamentUpdateDto.getCategoryId()))
+                        .orElseThrow(() -> new NoSuchElementException("Category not found")).getCategoryId().intValue()
+                : tournament.getCategoryId());
 
         tournament.setUpdatedAt(LocalDateTime.now());
 
@@ -274,7 +277,7 @@ public class TournamentService {
                 .build();
     }
 
-    public Optional<Tournament> findById(Integer id){
+    public Optional<Tournament> findById(Integer id) {
         return Optional.ofNullable(tournamentRepository.findTournamentByIdAndIsDeletedFalse(id).orElseThrow(() -> new NoSuchElementException("Tournament not found")));
     }
 
@@ -290,15 +293,13 @@ public class TournamentService {
                 .build();
     }
 
-    public void updateTournamentStatus(Integer tournamentId, StatusRequest statusRequest) {
+    public void discardTournament(Integer tournamentId) {
         Tournament tournament = tournamentRepository.findTournamentByIdAndIsDeletedFalse(tournamentId)
                 .orElseThrow(() -> new NoSuchElementException("Tournament not found"));
-
-        if (statusRequest.getStatus() == TournamentStatus.DELETED || statusFlow.indexOf(statusRequest.getStatus()) < statusFlow.indexOf(tournament.getStatus())) {
-            throw new InvalidRequestException("Cannot update tournament status");
+        if (tournament.getStatus() == TournamentStatus.DISCARDED) {
+            throw new InvalidRequestException("Cannot discard tournament");
         }
-
-        tournament.setStatus(statusRequest.getStatus());
+        tournament.setStatus(TournamentStatus.DISCARDED);
         tournamentRepository.save(tournament);
     }
 }
