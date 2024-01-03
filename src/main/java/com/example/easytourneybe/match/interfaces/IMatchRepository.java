@@ -125,11 +125,11 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
                                 THEN -1
                                 ELSE
                                     (CASE WHEN m.teamOneResult > m.teamTwoResult
-                                        THEN m.teamOneId
+                                        THEN m.teamOneResult
                                         ELSE
                                             (CASE WHEN m.teamOneResult = m.teamTwoResult
                                                 THEN 0
-                                                ELSE m.teamTwoId
+                                                ELSE m.teamTwoResult
                                             END)
                                      END)
                             END)
@@ -138,11 +138,11 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
                                 THEN -1
                                 ELSE
                                     (CASE WHEN m.teamOneResult > m.teamTwoResult
-                                        THEN m.teamOneId
+                                        THEN m.teamOneResult
                                         ELSE
                                             (CASE WHEN m.teamOneResult = m.teamTwoResult
                                                 THEN 0
-                                                ELSE m.teamTwoId
+                                                ELSE m.teamTwoResult
                                             END)
                                      END)
                             END)
@@ -156,4 +156,33 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
                 ORDER BY e.date DESC, m.startTime DESC
             """)
     List<MatchOfLeaderBoardDto> getMatchOfLeaderBoard(Integer tournamentId);
+    @Query(value = """
+        SELECT m1.*
+        FROM match m1
+        JOIN event_date ed1 ON m1.event_date_id = ed1.id 
+        JOIN tournament t1 ON ed1.tournament_id = t1.tournament_id 
+        WHERE t1.tournament_id = :tournamentId 
+        AND EXISTS (
+            SELECT 1
+            FROM match m2
+            JOIN event_date ed2 ON m2.event_date_id = ed2.id 
+            JOIN tournament t2 ON ed2.tournament_id = t2.tournament_id 
+            WHERE t2.tournament_id = :tournamentId 
+            AND m1.id <> m2.id
+            AND (
+                (m1.team_one_id = m2.team_one_id AND m1.team_two_id = m2.team_two_id)
+                OR
+                (m1.team_one_id = m2.team_two_id AND m1.team_two_id = m2.team_one_id)
+            )
+        )
+        """, nativeQuery = true)
+    List<Match>findAllDuplicateMatchByTournamentId(Integer tournamentId);
+    @Query(value = """
+        SELECT m.*
+        FROM match m 
+        JOIN event_date ed ON m.event_date_id = ed.id 
+        WHERE m.event_date_id = :eventDateId
+        ORDER BY m.start_time ASC
+        """, nativeQuery = true)
+    List<Match>getAllByEventDateIdOrOrderByStartTime(Integer eventDateId);
 }

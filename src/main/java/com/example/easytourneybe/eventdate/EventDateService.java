@@ -3,9 +3,15 @@ package com.example.easytourneybe.eventdate;
 import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.eventdate.dto.EventDateAdditionalDto;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
+import com.example.easytourneybe.match.Match;
+import com.example.easytourneybe.match.interfaces.IMatchRepository;
+import com.example.easytourneybe.model.ResponseObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -21,6 +27,8 @@ public class EventDateService {
 
     @Autowired
     EventDateRepository eventDateRepository;
+    @Autowired
+    IMatchRepository matchRepository;
     public List<EventDate> findAllByTournamentId(Integer tournamentId) {
         return eventDateRepository.findAllByTournamentId(tournamentId);
     };
@@ -42,7 +50,8 @@ public class EventDateService {
         return eventDateRepository.findById(eventDateId);
     }
 
-    public EventDate updateStarTimeAndEndTime(Integer tournamentId, Integer eventDateId, String startTime, String endTime) {
+    public ResponseEntity<ResponseObject> updateStarTimeAndEndTime(Integer tournamentId, Integer eventDateId, String startTime, String endTime) {
+        String warningMessage = "";
         EventDate eventDate = eventDateRepository.findById(eventDateId).orElseThrow(
                 () -> new NoSuchElementException("EventDate with id " + eventDateId + " does not exist"));
 
@@ -63,11 +72,26 @@ public class EventDateService {
         if(eventDate.getDate().equals(LocalDate.now()) && startTimeValid.isBefore(LocalTime.now())){
             throw new InvalidRequestException("Start time must be after current time");
         }
-
+        List< Match > matches = matchRepository.getAllByEventDateIdOrOrderByStartTime(eventDateId);
+        long startTimeChange= Duration.between(eventDate.getStartTime(),startTimeValid).toMinutes();
         eventDate.setStartTime(startTimeValid);
         eventDate.setEndTime(endTimeValid);
         eventDate.setUpdatedAt(LocalDateTime.now());
-        return eventDateRepository.save(eventDate);
+        for (Match match : matches) {
+            match.setStartTime(match.getStartTime().plusMinutes(startTimeChange));
+            match.setEndTime(match.getEndTime().plusMinutes(startTimeChange));
+            if(match.getStartTime().isAfter(eventDate.getEndTime()) || match.getEndTime().isAfter(eventDate.getEndTime())){
+                warningMessage = "Time of event date is not enough for all matches, please change time of event date or change match duration of some matches";
+            }
+        }
+
+        ResponseObject responseObject = new ResponseObject(
+                true, 1, eventDateRepository.save(eventDate)
+        );
+        if (!warningMessage.isEmpty()){
+            responseObject.setAdditionalData(java.util.Collections.singletonMap("warningMessage", warningMessage));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 
     public List<EventDateAdditionalDto> findAllEventDatesAndCountMatch(Integer tournamentId) {

@@ -6,13 +6,17 @@ import com.example.easytourneybe.exceptions.InvalidRequestException;
 import com.example.easytourneybe.generation.interfaces.IGenerationService;
 import com.example.easytourneybe.match.Match;
 import com.example.easytourneybe.match.dto.MatchDto;
+import com.example.easytourneybe.match.interfaces.IMatchRepository;
 import com.example.easytourneybe.match.interfaces.IMatchService;
+import com.example.easytourneybe.model.ResponseObject;
 import com.example.easytourneybe.team.Team;
 import com.example.easytourneybe.tournament.Tournament;
 import com.example.easytourneybe.tournament.TournamentRepository;
 import com.example.easytourneybe.tournament.TournamentService;
 import com.example.easytourneybe.util.MatchUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -32,7 +36,8 @@ public class GenerationService implements IGenerationService {
 
     @Autowired
     private TournamentRepository tournamentRepository;
-
+    @Autowired
+    private IMatchRepository matchRepository;
     @Override
     public List<GenerationDto> generate(Integer tournamentId, Integer duration, Integer betweenTime, LocalTime startTime, LocalTime endTime) {
         List<List<Team>> matches = matchService.matchList(tournamentId);
@@ -131,15 +136,29 @@ public class GenerationService implements IGenerationService {
     }
 
     @Override
-    public List<GenerationDto> getAllGeneration(Integer tournamentId) {
+    public ResponseEntity<ResponseObject> getAllGeneration(Integer tournamentId) {
         List<EventDate> eventDates = eventDateService.findAllByTournamentId(tournamentId);
         List<GenerationDto> generations = new ArrayList<>();
         eventDates.sort(Comparator.comparing(EventDate::getDate));
         for (EventDate eventDate : eventDates) {
+
             List<MatchDto> matches = matchUtils.convertMatchListToMatchDtoList(matchService.getMatchByEventDateId(eventDate.getId()));
             generations.add(matchUtils.createGeneration(Optional.of(eventDate), matches));
         }
-        return generations;
+        ResponseObject responseObject = new ResponseObject(
+                true, generations.size(), generations
+        );
+
+        List<Match> duplicateMatch = matchRepository.findAllDuplicateMatchByTournamentId(tournamentId);
+        //if there are a duplicate match, then warning
+        if (duplicateMatch.size() > 1) {
+            responseObject.setAdditionalData(java.util.Collections.singletonMap("duplicateMatch", duplicateMatch));
+        }
+        //if the time of event date is not enough for all matches, then warning
+        if(!checkEnoughTime(eventDates).isEmpty()){
+            responseObject.setAdditionalData(java.util.Collections.singletonMap("Time not enough", checkEnoughTime(eventDates)));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }
 
     public List<Match> updateInDate(Match match, Integer duration, Integer betweenTime, List<Match> matchesOfNewEventDate, Match oldMatch, Integer indexOfNewTime, Match matchOfNewTime) {
@@ -226,5 +245,29 @@ public class GenerationService implements IGenerationService {
         }
         return matchList;
     }
+    private Map<String, Object> checkEnoughTime(List<EventDate> eventDates) {
+        String warningMessage = "";
+        List<Integer> eventDateId = new ArrayList<>();
+
+        for (EventDate eventDate : eventDates) {
+            List<Match> matches = matchService.getMatchByEventDateId(eventDate.getId());
+
+            for (Match match : matches) {
+                if (match.getStartTime().isAfter(eventDate.getEndTime()) || match.getEndTime().isAfter(eventDate.getEndTime())) {
+                    warningMessage = "Time of event date is not enough for all matches";
+                    eventDateId.add(eventDate.getId());
+                    break;
+                }
+            }
+        }
+        if(warningMessage.isEmpty()){
+            return Collections.emptyMap();
+        }
+        Map<String, Object> result = new HashMap<>();
+        result.put("warningMessage", warningMessage);
+        result.put("eventDateId", eventDateId);
+        return result;
+    }
+
 
 }

@@ -12,5 +12,5 @@ import java.util.List;
 @NoArgsConstructor
 public class ResultDto {
     LocalDate date;
-    List<Match> matches;
+    List<MatchResultDto> matches;
 }

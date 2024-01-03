@@ -20,9 +20,7 @@ public class GenerationController {
 
     @GetMapping("/{tournamentId}")
     public ResponseEntity<?> getAllGeneration(@PathVariable Integer tournamentId){
-        List<GenerationDto> generations= generationService.getAllGeneration(tournamentId);
-        ResponseObject responseObject = new ResponseObject(true, generations.size(), generations);
-        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+        return generationService.getAllGeneration(tournamentId);
     }
 
     @PostMapping(value = "/{tournamentId}")

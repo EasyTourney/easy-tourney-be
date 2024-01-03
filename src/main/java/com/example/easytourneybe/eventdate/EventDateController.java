@@ -18,10 +18,6 @@ public class EventDateController {
             @PathVariable Integer tournamentId,
             @PathVariable Integer eventDateId,
             @RequestBody UpdateTimeDto updateTimeDto) {
-        EventDate updateEventDate=eventDateService.updateStarTimeAndEndTime(tournamentId,eventDateId,updateTimeDto.getStartTime(),updateTimeDto.getEndTime());
-        ResponseObject responseObject = new ResponseObject(
-                true, 1, updateEventDate
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+        return eventDateService.updateStarTimeAndEndTime(tournamentId,eventDateId,updateTimeDto.getStartTime(),updateTimeDto.getEndTime());
     }
 }

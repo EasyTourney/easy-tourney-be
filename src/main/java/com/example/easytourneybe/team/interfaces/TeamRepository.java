@@ -38,4 +38,6 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     @Query("SELECT team FROM Team team WHERE team.tournamentId = :tournament_id")
     List<Team> findTeamByTournamentId(@Param("tournament_id") Integer tournamentId);
     Team getTeamByTeamId(Long id);
+    @Query("SELECT team.teamName FROM Team team WHERE team.teamId = :id")
+    String getTeamNameByTeamId(Long id);
 }
