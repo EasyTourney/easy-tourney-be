@@ -125,11 +125,11 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
                                 THEN -1
                                 ELSE
                                     (CASE WHEN m.teamOneResult > m.teamTwoResult
-                                        THEN m.teamOneResult
+                                        THEN m.teamOneId
                                         ELSE
                                             (CASE WHEN m.teamOneResult = m.teamTwoResult
                                                 THEN 0
-                                                ELSE m.teamTwoResult
+                                                ELSE m.teamTwoId
                                             END)
                                      END)
                             END)
@@ -138,11 +138,11 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
                                 THEN -1
                                 ELSE
                                     (CASE WHEN m.teamOneResult > m.teamTwoResult
-                                        THEN m.teamOneResult
+                                        THEN m.teamOneId
                                         ELSE
                                             (CASE WHEN m.teamOneResult = m.teamTwoResult
                                                 THEN 0
-                                                ELSE m.teamTwoResult
+                                                ELSE m.teamTwoId
                                             END)
                                      END)
                             END)
