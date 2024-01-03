@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/event")
+@RequestMapping("/tournament/{tournamentId}/event")
 @RequiredArgsConstructor
 public class EventController {
 
@@ -20,8 +20,10 @@ public class EventController {
 
 
     @PostMapping("/{eventDateId}")
-    public ResponseEntity<?> createEvent(@PathVariable Integer eventDateId,@Valid @RequestBody EventCreateAndUpdateDto evtCreateDto) {
-        var result = eventService.createEvent(eventDateId, evtCreateDto);
+    public ResponseEntity<?> createEvent(@PathVariable Integer eventDateId,
+                                         @Valid @RequestBody EventCreateAndUpdateDto evtCreateDto,
+                                         @PathVariable Integer tournamentId) {
+        var result = eventService.createEvent(eventDateId, evtCreateDto, tournamentId);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseObject.builder()
                         .success(true)
@@ -32,8 +34,8 @@ public class EventController {
     }
 
     @DeleteMapping("/{eventId}")
-    public ResponseEntity<?> deleteEvent(@PathVariable Integer eventId) {
-        GenerationDto result = eventService.deleteEvent(eventId);
+    public ResponseEntity<?> deleteEvent(@PathVariable Integer eventId, @PathVariable Integer tournamentId) {
+        GenerationDto result = eventService.deleteEvent(eventId, tournamentId);
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .success(true)
@@ -44,8 +46,10 @@ public class EventController {
     }
 
     @PutMapping("/{eventId}")
-    public ResponseEntity<?> updateEvent(@PathVariable Integer eventId,@Valid @RequestBody EventCreateAndUpdateDto eventDto) {
-        GenerationDto result = eventService.updateEvent(eventId, eventDto);
+    public ResponseEntity<?> updateEvent(@PathVariable Integer eventId,
+                                         @Valid @RequestBody EventCreateAndUpdateDto eventDto,
+                                         @PathVariable Integer tournamentId) {
+        GenerationDto result = eventService.updateEvent(eventId, eventDto, tournamentId);
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .success(true)

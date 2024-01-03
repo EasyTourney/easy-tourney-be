@@ -15,7 +15,7 @@ import java.util.Set;
 @Builder
 public class CreateTournamentRequest {
 
-    @Pattern(regexp = "^[a-zA-Z0-9\\s]*$", message = "Title can not contain special character")
+    @Pattern(regexp = "^[a-zA-Z0-9\\p{L}\\s]*$", message = "Title can not contain special character")
     @Length(max = 50, min = 2, message = "Tournament title must be between 2 and 50 characters")
     private String title;
     @NotNull(message = "category id must not be null.")

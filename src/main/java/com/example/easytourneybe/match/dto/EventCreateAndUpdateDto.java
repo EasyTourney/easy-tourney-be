@@ -20,7 +20,7 @@ public class EventCreateAndUpdateDto {
     private Integer timeDuration;
     @NotNull(message = "Title must not be null")
     @Length(min = 1, max = 30, message = "Title of Event must be between 1 and 30 characters")
-    @Pattern(regexp = "^[a-zA-Z0-9\\s]*$", message = "Title can not contain special character")
+    @Pattern(regexp = "^[a-zA-Z0-9\\p{L}\\s]*$", message = "Title can not contain special character")
     private String title;
 
     public void setTitle(String title) {

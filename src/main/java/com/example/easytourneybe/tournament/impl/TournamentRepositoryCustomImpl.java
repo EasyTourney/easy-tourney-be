@@ -67,7 +67,7 @@ public class TournamentRepositoryCustomImpl implements TournamentRepositoryCusto
         String statusFilter = "true";
         if (status != null) statusFilter = "status='" + status + "'";
         String searchFilter = "true";
-        if (!search.equals("")) searchFilter = "(t.title LIKE '%" + search + "%')";
+        if (!search.equals("")) searchFilter = "(LOWER(t.title) LIKE '%" + search.toLowerCase() + "%')";
         String categoryIdFilter = "true";
         if (categoryId != null) categoryIdFilter = "t.category_id = " + categoryId;
         String sql = String.format(GET_TOURNAMENT_BY_USERID, userIdFilter, statusFilter, searchFilter, categoryIdFilter,
