@@ -2,6 +2,7 @@ package com.example.easytourneybe.match;
 
 import com.example.easytourneybe.generation.GenerationDto;
 import com.example.easytourneybe.match.dto.EventCreateAndUpdateDto;
+import com.example.easytourneybe.match.dto.MatchDto;
 import com.example.easytourneybe.match.interfaces.EventService;
 import com.example.easytourneybe.model.ResponseObject;
 import jakarta.validation.Valid;

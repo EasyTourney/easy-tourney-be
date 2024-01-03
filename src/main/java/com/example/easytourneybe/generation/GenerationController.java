@@ -29,7 +29,7 @@ public class GenerationController {
     public ResponseEntity<?> generate(@PathVariable Integer tournamentId,
                                       @RequestBody(required = false) GenerationRequest request) {
 
-        if(request.isStartTimeValid() && request.isEndTimeValid() && request.isTimeRangeValid()) {
+        if( request.isTimeRangeValid()) {
             List<GenerationDto> generations = generationService.generate(tournamentId, request.getDuration(), request.getBetweenTime(), request.getStartTime(), request.getEndTime());
             ResponseObject responseObject = new ResponseObject(true, generations.size(), generations);
             return ResponseEntity.status(HttpStatus.OK).body(responseObject);

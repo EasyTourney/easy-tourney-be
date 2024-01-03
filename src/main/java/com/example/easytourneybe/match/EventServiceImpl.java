@@ -7,6 +7,7 @@ import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
 import com.example.easytourneybe.generation.GenerationDto;
 import com.example.easytourneybe.match.dto.EventCreateAndUpdateDto;
+import com.example.easytourneybe.match.dto.MatchDto;
 import com.example.easytourneybe.match.interfaces.EventService;
 import com.example.easytourneybe.match.interfaces.IMatchRepository;
 import com.example.easytourneybe.tournament.Tournament;

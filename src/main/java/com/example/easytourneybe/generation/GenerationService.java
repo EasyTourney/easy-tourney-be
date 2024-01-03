@@ -69,7 +69,7 @@ public class GenerationService implements IGenerationService {
         if (!matchUtils.compareNumMatchAndNumMatchTime(matches.size(), matchUtils.numberMatchTimes(timeSheetMatches))) {
             throw new InvalidRequestException("The tournament schedule does not accommodate the current number of matches.");
         } else {
-            List<MatchDto> matchList = matchService.mappingMatchAndTime(matches, timeSheetMatches);
+            List<MatchDto> matchList = matchService.mappingMatchAndTime(matches, timeSheetMatches,duration);
             eventDates.sort(Comparator.comparing(EventDate::getDate));
             for (EventDate eventDate : eventDates) {
                 generations.add(matchUtils.createGeneration(Optional.ofNullable(eventDate), matchList));

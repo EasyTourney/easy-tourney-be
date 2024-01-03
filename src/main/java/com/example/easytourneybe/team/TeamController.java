@@ -36,6 +36,18 @@ public class TeamController {
                 responseObject
         );
     }
+
+    @GetMapping("/team/all")
+    public ResponseEntity<ResponseObject> getAllTeam(@PathVariable Integer tournament_id){
+        List<Team> allTeam=teamService.getAllTeamByTournamentId(tournament_id);
+        ResponseObject responseObject = new ResponseObject(
+                true, allTeam.size(), allTeam
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(
+                responseObject
+        );
+    }
+
     @PostMapping("/team")
     public ResponseEntity<ResponseObject> createTeam(@Valid @RequestBody Team team,
                                                      @PathVariable Integer tournament_id) {
