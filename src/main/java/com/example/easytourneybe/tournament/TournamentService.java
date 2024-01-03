@@ -28,10 +28,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static com.example.easytourneybe.util.TournamentStatusPermission.*;
 
@@ -103,7 +100,14 @@ public class TournamentService {
 
 
     public ResponseObject getTournamentToShowGeneral(Integer id) {
-        return tournamentRepository.findTournamentToShowGeneral(id);
+        ResponseObject response = tournamentRepository.findTournamentToShowGeneral(id);
+        response.setAdditionalData(
+            Map.of(
+                "matchOfEventDates", eventDateService.findAllEventDatesAndCountMatch(id),
+                "tournamentPlan", getPlanByTournamentId(id)
+            )
+        );
+        return response;
     }
 
     @Transactional
@@ -301,5 +305,9 @@ public class TournamentService {
         }
         tournament.setStatus(TournamentStatus.DISCARDED);
         tournamentRepository.save(tournament);
+    }
+
+    public TournamentPlanDto getPlanByTournamentId(Integer tournamentId) {
+        return tournamentRepository.getPlanByTournamentId(tournamentId).orElseThrow(() -> new NoSuchElementException("Tournament not found"));
     }
 }

@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @AllArgsConstructor
@@ -44,6 +45,12 @@ public class Tournament {
     @Column(name = "time_between")
     private Integer timeBetween;
 
+    @Column(name = "start_time_default")
+    private LocalTime startTimeDefault;
+
+    @Column(name = "end_time_default")
+    private LocalTime endTimeDefault;
+
     @Column(name = "format")
     @Enumerated(EnumType.STRING)
     private TournamentFormat format;
@@ -59,6 +66,8 @@ public class Tournament {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        startTimeDefault = LocalTime.of(0, 0, 0);
+        endTimeDefault = LocalTime.of(23, 59, 59);
         isDeleted = false;
     }
 }
