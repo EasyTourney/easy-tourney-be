@@ -54,6 +54,8 @@ public class GenerationService implements IGenerationService {
             } else {
                 tournament.get().setTimeBetween(betweenTime);
             }
+            tournament.get().setEndTimeDefault(endTime);
+            tournament.get().setStartTimeDefault(startTime);
             tournamentRepository.save(tournament.get());
         }
 

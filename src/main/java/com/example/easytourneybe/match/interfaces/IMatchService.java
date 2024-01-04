@@ -34,4 +34,6 @@ public interface IMatchService {
 
 
     List<GenerationDto> dragAndDropMatch(Integer matchId, Integer newEventDateId, Integer newIndexOfMatch);
+
+    void deleteAllByTournamentId(Integer id);
 }

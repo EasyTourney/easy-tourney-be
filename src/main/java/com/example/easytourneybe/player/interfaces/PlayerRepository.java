@@ -2,6 +2,7 @@ package com.example.easytourneybe.player.interfaces;
 
 import com.example.easytourneybe.player.dto.Player;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -17,4 +18,16 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     @Query("SELECT COUNT(p.playerId) FROM Player p WHERE p.teamId = :teamId")
     Long getTotalPlayers(@Param("teamId") Long teamId);
     Player findByPlayerIdAndTeamId(Long playerId, Long teamId);
+
+
+    @Modifying
+    @Query("""
+    delete from
+    Player p 
+    where p.teamId in (
+                select t.teamId
+                from Team t
+                where t.tournamentId = :tournamentId)
+    """)
+    void deleteAllPlayerByTournamentId(@Param("tournamentId") Integer tournamentId);
 }

@@ -92,4 +92,8 @@ public class PlayerService {
         }
         return player;
     }
+
+    public void deleteAllPlayerByTournamentId(Integer tournamentId) {
+        playerRepository.deleteAllPlayerByTournamentId(tournamentId);
+    }
 }

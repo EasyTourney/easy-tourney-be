@@ -6,6 +6,7 @@ import com.example.easytourneybe.match.dto.MatchOfLeaderBoardDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -185,4 +186,14 @@ public interface IMatchRepository extends JpaRepository<Match, Integer> {
         ORDER BY m.start_time ASC
         """, nativeQuery = true)
     List<Match>getAllByEventDateIdOrOrderByStartTime(Integer eventDateId);
+
+    @Modifying
+    @Query("""
+        delete
+        from Match m
+        where m.eventDateId in (select ed.id
+                                from EventDate ed
+                                where ed.tournamentId = :tournamentId)
+            """)
+    void deleteAllByTournamentId(@Param("tournamentId") Integer tournamentId);
 }

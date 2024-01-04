@@ -151,7 +151,7 @@ public class MatchService implements IMatchService {
 
             //Ensure that the time slots fall within the allowed time range for each event date.
             while (startMatch.isBefore(eventDates.get(i).getEndTime()) && endMatch.isBefore(eventDates.get(i).getEndTime())
-                    && j < timeSheetEachEventDate && startMatch.isBefore(endDate) && endMatch.isBefore(endDate) && numMatch > 0
+                    && j < timeSheetEachEventDate  && numMatch > 0
                     && checkDateTime.isBefore(thisEventDate)) {
                 List<LocalTime> matchTime = new ArrayList<>(2);
                 matchTime.add(startMatch);
@@ -159,7 +159,7 @@ public class MatchService implements IMatchService {
                 times.add(matchTime);
                 startMatch = endMatch.plusMinutes(betweenTime);
                 endMatch = startMatch.plusMinutes(duration);
-                checkDateTime = checkDateTime.plusMinutes(betweenTime);
+                checkDateTime = checkDateTime.plusMinutes(betweenTime + duration);
                 numMatch--;
                 j++;
             }
@@ -617,5 +617,10 @@ public class MatchService implements IMatchService {
     @Override
     public List<MatchOfLeaderBoardDto> getMatchOfLeaderBoardByTournamentId(Integer tournamentId) {
         return matchRepository.getMatchOfLeaderBoard(tournamentId);
+    }
+
+    @Override
+    public void deleteAllByTournamentId(Integer id) {
+        matchRepository.deleteAllByTournamentId(id);
     }
 }

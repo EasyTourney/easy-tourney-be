@@ -81,7 +81,7 @@ public class MatchUtils {
                 countTime++;
                 startMatch = endMatch.plusMinutes(betweenTime);
                 endMatch = startMatch.plusMinutes(duration);
-                checkDateTime = checkDateTime.plusMinutes(betweenTime);
+                checkDateTime = checkDateTime.plusMinutes(betweenTime + duration);
             }
             numberOfTimeEachEvent.put(eventDate, countTime);
         }

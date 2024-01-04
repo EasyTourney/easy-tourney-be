@@ -15,6 +15,7 @@ import com.example.easytourneybe.match.MatchService;
 import com.example.easytourneybe.model.ResponseObject;
 import com.example.easytourneybe.organizer_tournament.OrganizerTournament;
 import com.example.easytourneybe.organizer_tournament.OrganizerTournamentService;
+import com.example.easytourneybe.player.PlayerService;
 import com.example.easytourneybe.team.TeamService;
 import com.example.easytourneybe.user.UserService;
 import com.example.easytourneybe.util.DateValidatorUtils;
@@ -25,10 +26,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.example.easytourneybe.util.TournamentStatusPermission.*;
 
@@ -59,6 +63,9 @@ public class TournamentService {
     @Autowired
     private MatchService matchService;
 
+    @Autowired
+    private PlayerService playerService;
+
     private final String INSERT_INTO_TOURNAMENT_ORGANIZER_TABLE =
             "INSERT INTO organizer_tournament(user_id, tournament_id) VALUES (:userId, :tournamentId)";
 
@@ -83,6 +90,7 @@ public class TournamentService {
         return results;
     }
 
+    @Transactional
     public Optional<Tournament> deleteTournament(Integer id) {
         Optional<Tournament> foundTournament = tournamentRepository.findTournamentByIdAndIsDeletedFalse(id);
         if (foundTournament.isPresent()) {
@@ -90,7 +98,11 @@ public class TournamentService {
             tournament.setIsDeleted(true);
             tournament.setDeletedAt(LocalDateTime.now());
             tournament.setStatus(TournamentStatus.DELETED);
+            matchService.deleteAllByTournamentId(tournament.getId());
+            playerService.deleteAllPlayerByTournamentId(tournament.getId());
             teamService.deleteTeamByTournamentId(id);
+            eventDateService.deleteAllByTournamentId(tournament.getId());
+            organizerTournamentService.deleteAllByTournamentId(tournament.getId());
             tournamentRepository.save(tournament);
             return Optional.of(tournament);
         } else {
@@ -121,12 +133,12 @@ public class TournamentService {
         Optional<Category> categoryOpt = categoryService.findCategoryById(Long.valueOf(categoryId));
         if (!categoryOpt.isPresent() || categoryOpt.get().isDeleted())
             throw new NoSuchElementException("category not found with id: " + categoryId);
-        Integer defaultMatchDuration = 60;
         Tournament tournament = Tournament.builder().title(title).categoryId(categoryId)
                 .description(desc)
                 .format(TournamentFormat.ROUND_ROBIN)
                 .status(TournamentStatus.NEED_INFORMATION)
-                .matchDuration(defaultMatchDuration)
+                .matchDuration(null)
+                .timeBetween(null)
                 .build();
         tournament = tournamentRepository.save(tournament);
         final Integer tournamentId = tournament.getId();
@@ -135,8 +147,8 @@ public class TournamentService {
             events = eventDates.stream().map(date -> {
                 return EventDate.builder().tournamentId(tournamentId)
                         .date(date)
-                        .startTime(LocalTime.MIN)
-                        .endTime(LocalTime.of(23, 59, 59))
+                        .startTime(null)
+                        .endTime(null)
                         .build();
             }).toList();
         }
@@ -309,5 +321,34 @@ public class TournamentService {
 
     public TournamentPlanDto getPlanByTournamentId(Integer tournamentId) {
         return tournamentRepository.getPlanByTournamentId(tournamentId).orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+    }
+
+    public List<Tournament> findTournamentReadyNeedToChangeToInProgress() {
+        return tournamentRepository.findTournamentReadyNeedToChangeToInProgress();
+    }
+
+    public List<Tournament> saveAll(List<Tournament> tournaments) {
+        return tournamentRepository.saveAll(tournaments);
+    }
+
+    public List<Tournament> findTournamentInProgressNeedToChangeToFinished() {
+        List<Object[]> result = tournamentRepository.findTournamentInProgressNeedToChangeToFinished();
+        return result.stream().map(objects -> {
+            Integer tournamentId = (Integer) objects[0];
+            LocalTime endTime = ((Time) objects[1]).toLocalTime();
+            LocalDate date = ((Date) objects[2]).toLocalDate();
+            if (date.isBefore(LocalDate.now())
+               || (date.isEqual(LocalDate.now()) && endTime.isBefore(LocalTime.now())))
+                return findById(tournamentId).get();
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    public List<Tournament> findTournamentNeedInformationNeedToChangeToFinished() {
+        List<Object[]> result = tournamentRepository.findTournamentNeedInformationNeedToChangeToFinished();
+        return result.stream().map(objects -> {
+            Integer tournamentId = (Integer) objects[0];
+                return findById(tournamentId).get();
+        }).collect(Collectors.toList());
     }
 }
