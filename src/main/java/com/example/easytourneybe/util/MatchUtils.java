@@ -41,6 +41,7 @@ public class MatchUtils {
         if (match.getType().equals(TypeMatch.MATCH)) {
             matchDTO.setTeamOne(teamService.getTeamById(match.getTeamOneId()));
             matchDTO.setTeamTwo(teamService.getTeamById(match.getTeamTwoId()));
+            matchDTO.setTimeDuration(match.getMatchDuration());
         }
         matchDTO.setStartTime(match.getStartTime());
         matchDTO.setEndTime(match.getEndTime());

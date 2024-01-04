@@ -14,8 +14,6 @@ import java.util.Optional;
 @Repository
 public interface TournamentRepository extends JpaRepository<Tournament, Integer>, TournamentRepositoryCustom {
 
-        Page<Tournament> findAllByStatusAndTitleContaining(TournamentStatus status, String infix, Pageable pageable);
-        Page<Tournament> findAllByTitleContaining(String infix, Pageable pageable);
         @Query("SELECT c FROM tournament c WHERE c.id = :id AND c.isDeleted = false")
         Optional<Tournament> findTournamentByIdAndIsDeletedFalse(@Param("id") Integer id);
         @Query("SELECT t FROM tournament t WHERE t.id = :tournamentId AND t.isDeleted = false AND t.status != 'DISCARDED' AND t.status != 'FINISHED'")
@@ -76,5 +74,13 @@ public interface TournamentRepository extends JpaRepository<Tournament, Integer>
        
         """, nativeQuery = true)
         List<Object[]> findTournamentNeedInformationNeedToChangeToFinished();
+
+
+        @Query("""
+        select t
+        from tournament t
+        where t.categoryId = :categoryId
+        """)
+        List<Tournament> findTournamentByCategoryId(@Param("categoryId") Integer categoryId);
 }
 

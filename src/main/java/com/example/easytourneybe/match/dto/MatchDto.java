@@ -23,4 +23,5 @@ public class MatchDto {
     private Integer eventDateId;
     private String title;
     private TypeMatch type;
+    private Integer timeDuration;
 }

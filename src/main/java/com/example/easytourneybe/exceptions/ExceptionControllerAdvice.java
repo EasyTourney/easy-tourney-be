@@ -79,7 +79,6 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public static ResponseEntity<ResponseObject> handleNullPointerException(NullPointerException e) {
-        e.printStackTrace();
         ResponseObject responseObject = new ResponseObject(
                 false,
                 0,

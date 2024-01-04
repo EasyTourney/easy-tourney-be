@@ -351,4 +351,9 @@ public class TournamentService {
                 return findById(tournamentId).get();
         }).collect(Collectors.toList());
     }
+
+    public List<Tournament> findTournamentByCategoryId(Integer categoryId) {
+        return tournamentRepository.findTournamentByCategoryId(categoryId);
+
+    }
 }

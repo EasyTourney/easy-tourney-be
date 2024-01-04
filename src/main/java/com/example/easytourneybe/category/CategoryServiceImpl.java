@@ -2,19 +2,33 @@ package com.example.easytourneybe.category;
 
 import com.example.easytourneybe.exceptions.InvalidRequestException;
 import com.example.easytourneybe.category.interfaces.CategoryRepository;
+import com.example.easytourneybe.tournament.Tournament;
+import com.example.easytourneybe.tournament.TournamentService;
 import com.example.easytourneybe.validations.CommonValidation;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryServiceImpl implements com.example.easytourneybe.category.interfaces.CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
+
+
+    private final TournamentService tournamentService;
+
+    @Autowired
+    public CategoryServiceImpl(@Lazy TournamentService tournamentService) {
+        this.tournamentService = tournamentService;
+    }
+
     private final CommonValidation commonValidation=new CommonValidation();
 
     @Override
@@ -71,6 +85,7 @@ public class CategoryServiceImpl implements com.example.easytourneybe.category.i
         return foundCategories;
     }
 
+    @Transactional
     @Override
     public Optional<Category> updateCategoryIsDelete(Long id) {
         Optional<Category> categoryOptional = categoryRepository.findCategoryById(id);
@@ -80,6 +95,12 @@ public class CategoryServiceImpl implements com.example.easytourneybe.category.i
             category.setDeleted(true);
             category.setDeletedAt(LocalDateTime.now());
             categoryRepository.save(category);
+            // update all tournament has category to deleted
+            List<Tournament> tournaments = tournamentService.findTournamentByCategoryId(id.intValue());
+            tournaments = tournaments.stream().filter(tournament -> !tournament.getIsDeleted()).collect(Collectors.toList());
+            if (!tournaments.isEmpty()) {
+                tournaments.forEach(tournament -> tournamentService.deleteTournament(tournament.getId()));
+            }
             return Optional.of(category);
         } else {
             throw new NoSuchElementException("Category not found");
