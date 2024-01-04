@@ -34,4 +34,10 @@ public class Team {
     public void setTeamName(String teamName) {
         this.teamName = (teamName != null) ? teamName.trim() : null;
     }
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        score = 0;
+    }
 }

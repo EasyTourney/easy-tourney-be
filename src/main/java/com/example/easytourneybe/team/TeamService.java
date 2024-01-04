@@ -1,17 +1,25 @@
 package com.example.easytourneybe.team;
 
 import com.example.easytourneybe.exceptions.InvalidRequestException;
+import com.example.easytourneybe.match.interfaces.IMatchRepository;
 import com.example.easytourneybe.team.dto.TeamPlayerDto;
 import com.example.easytourneybe.team.interfaces.TeamRepository;
-import jakarta.transaction.Transactional;
+import com.example.easytourneybe.tournament.Tournament;
 import com.example.easytourneybe.tournament.TournamentRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.example.easytourneybe.enums.tournament.TournamentStatus.NEED_INFORMATION;
+import static com.example.easytourneybe.util.TournamentStatusPermission.allowGenerateStatus;
 
 @Service
 public class TeamService {
@@ -19,6 +27,10 @@ public class TeamService {
     private TeamRepository teamRepository;
     @Autowired
     private TournamentRepository tournamentRepository;
+
+    @Autowired
+    IMatchRepository matchRepository;
+
     public List<TeamPlayerDto> getAllTeamAndPlayerCount(Integer id, Integer page, Integer size) {
             Pageable pageable= PageRequest.of(page,size);
            return teamRepository.getAllTeamAndPlayerCount(id, pageable).stream()
@@ -63,6 +75,16 @@ public class TeamService {
     }
     @Transactional
     public Optional<Team> deleteTeam(Integer tournamentId, Long id) {
+        Tournament tournament = tournamentRepository.findTournamentByIdAndIsDeletedFalse(tournamentId).orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+
+        if (!allowGenerateStatus.contains(tournament.getStatus())) {
+            throw new InvalidRequestException("You cannot delete a team from a tournament that is in progress, finished, or discarded.");
+        }
+
+        matchRepository.deleteMatchByTournamentId(tournamentId);
+        tournament.setStatus(NEED_INFORMATION);
+        tournamentRepository.save(tournament);
+
         Optional<Team> teamOptional = teamRepository.findTeamById(tournamentId,id);
         if (teamOptional.isPresent()) {
             Team team = teamOptional.get();

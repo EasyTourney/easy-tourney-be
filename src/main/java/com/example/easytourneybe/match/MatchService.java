@@ -484,13 +484,9 @@ public class MatchService implements IMatchService {
         Tournament tournament= tournamentRepository.findTournamentById(tournamentId).orElseThrow(() -> new NoSuchElementException("Tournament not found"));
         if(Objects.equals(tournament.getStatus().toString(), "NEED_INFORMATION"))
             throw new InvalidRequestException("Match not found");
-        if(Objects.equals(tournament.getStatus().toString(), "READY"))
-            throw new InvalidRequestException("Match has not occurred yet");
         Match match = matchRepository.findById(matchID)
                 .orElseThrow(() -> new NoSuchElementException("Match not found"));
-        EventDate eventDate= eventDateService.findByEventDateId(match.getEventDateId()).orElseThrow(() -> new NoSuchElementException("Event date not found"));
-        if(eventDate.getDate().isAfter(LocalDate.now()))
-            throw new InvalidRequestException("Match has not occurred yet");
+
         Team teamOne = teamRepository.getTeamByTeamId(match.getTeamOneId());
         Team teamTwo = teamRepository.getTeamByTeamId(match.getTeamTwoId());
 
