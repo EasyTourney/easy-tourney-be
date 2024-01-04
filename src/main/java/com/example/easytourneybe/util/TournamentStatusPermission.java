@@ -13,4 +13,6 @@ public class TournamentStatusPermission {
     public static final List<TournamentStatus> allowedAdvance = List.of(TournamentStatus.NEED_INFORMATION, TournamentStatus.READY, TournamentStatus.IN_PROGRESS);
 
     public static final List<TournamentStatus> allowedResetAllEventDate = List.of(TournamentStatus.NEED_INFORMATION);
+
+    public static final List<TournamentStatus> allowGenerateStatus = List.of(TournamentStatus.READY, TournamentStatus.NEED_INFORMATION);
 }

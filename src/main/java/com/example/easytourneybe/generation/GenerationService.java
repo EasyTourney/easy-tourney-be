@@ -1,5 +1,6 @@
 package com.example.easytourneybe.generation;
 
+import com.example.easytourneybe.enums.tournament.TournamentStatus;
 import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.eventdate.EventDateService;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
@@ -23,6 +24,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
+import static com.example.easytourneybe.util.TournamentStatusPermission.allowGenerateStatus;
+
 @Service
 public class GenerationService implements IGenerationService {
     @Autowired
@@ -44,18 +47,21 @@ public class GenerationService implements IGenerationService {
         List<EventDate> eventDates = eventDateService.findAllByTournamentId(tournamentId);
         Optional<Tournament> tournament = tournamentService.findById(tournamentId);
         if (tournament.isPresent()) {
-            if (duration == null) {
-                duration = tournament.get().getMatchDuration();
-            } else {
+            if (!allowGenerateStatus.contains(tournament.get().getStatus())) {
+                throw new InvalidRequestException("Cannot generate schedule for this tournament");
+            }
+
+            if (duration != null) {
                 tournament.get().setMatchDuration(duration);
             }
-            if (betweenTime == null) {
-                betweenTime = tournament.get().getTimeBetween();
-            } else {
+
+            if (betweenTime != null) {
                 tournament.get().setTimeBetween(betweenTime);
             }
+
             tournament.get().setEndTimeDefault(endTime);
             tournament.get().setStartTimeDefault(startTime);
+            tournament.get().setStatus(tournament.get().getStatus() == TournamentStatus.NEED_INFORMATION ? TournamentStatus.READY : tournament.get().getStatus());
             tournamentRepository.save(tournament.get());
         }
 

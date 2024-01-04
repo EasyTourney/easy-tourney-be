@@ -1,19 +1,16 @@
 package com.example.easytourneybe.match;
 
 import com.example.easytourneybe.enums.match.TypeMatch;
-import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.eventdate.EventDateService;
+import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
-import com.example.easytourneybe.match.dto.*;
 import com.example.easytourneybe.generation.GenerationDto;
-import com.example.easytourneybe.match.dto.ResponseChangeMatch;
+import com.example.easytourneybe.match.dto.*;
 import com.example.easytourneybe.match.interfaces.IMatchRepository;
 import com.example.easytourneybe.match.interfaces.IMatchService;
 import com.example.easytourneybe.model.ResponseObject;
-import com.example.easytourneybe.model.ResponseObject;
 import com.example.easytourneybe.team.Team;
 import com.example.easytourneybe.team.TeamService;
-import com.example.easytourneybe.team.interfaces.TeamRepository;
 import com.example.easytourneybe.team.interfaces.TeamRepository;
 import com.example.easytourneybe.tournament.TournamentRepository;
 import com.example.easytourneybe.util.MatchUtils;
@@ -22,19 +19,14 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class MatchService implements IMatchService {
@@ -425,6 +417,8 @@ public class MatchService implements IMatchService {
                     newStartTime = eventDateService.findByEventDateId(newEventDateId).get().getStartTime();
                 else
                     newStartTime = matchesInDate.get(matchesInDate.size() - 1).getEndTime().plusMinutes(betweenTime);
+                if (newStartTime.plusMinutes(duration).compareTo(newStartTime) <= 0)
+                    throw new InvalidRequestException("Not enough time to schedule");
             }
             match.setStartTime(newStartTime.minusMinutes(timeDifference));
             match.setEndTime(match.getStartTime().plusMinutes(duration));
