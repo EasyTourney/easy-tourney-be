@@ -78,11 +78,15 @@ public class EventDateService {
         eventDate.setEndTime(endTimeValid);
         eventDate.setUpdatedAt(LocalDateTime.now());
         for (Match match : matches) {
+            if ((match.getEndTime().plusMinutes(startTimeChange).isBefore(match.getEndTime()) ||match.getStartTime().plusMinutes(startTimeChange).isBefore(match.getStartTime())) && startTimeChange > 0) {
+                throw new InvalidRequestException("Match time is out of range");
+            }
             match.setStartTime(match.getStartTime().plusMinutes(startTimeChange));
             match.setEndTime(match.getEndTime().plusMinutes(startTimeChange));
             if(match.getStartTime().isAfter(eventDate.getEndTime()) || match.getEndTime().isAfter(eventDate.getEndTime())){
                 warningMessage = "Time of event date is not enough for all matches, please change time of event date or change match duration of some matches";
             }
+
         }
 
         ResponseObject responseObject = new ResponseObject(

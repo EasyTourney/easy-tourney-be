@@ -12,6 +12,7 @@ import com.example.easytourneybe.model.ResponseObject;
 import com.example.easytourneybe.team.Team;
 import com.example.easytourneybe.team.TeamService;
 import com.example.easytourneybe.team.interfaces.TeamRepository;
+import com.example.easytourneybe.tournament.Tournament;
 import com.example.easytourneybe.tournament.TournamentRepository;
 import com.example.easytourneybe.util.MatchUtils;
 import jakarta.transaction.Transactional;
@@ -480,8 +481,16 @@ public class MatchService implements IMatchService {
 
     public Match updateMatchResult(Integer tournamentId,Integer matchID, Integer teamOneResult, Integer teamTwoResult) {
         checkMatchInTournament(tournamentId, matchID);
+        Tournament tournament= tournamentRepository.findTournamentById(tournamentId).orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+        if(Objects.equals(tournament.getStatus().toString(), "NEED_INFORMATION"))
+            throw new InvalidRequestException("Match not found");
+        if(Objects.equals(tournament.getStatus().toString(), "READY"))
+            throw new InvalidRequestException("Match has not occurred yet");
         Match match = matchRepository.findById(matchID)
                 .orElseThrow(() -> new NoSuchElementException("Match not found"));
+        EventDate eventDate= eventDateService.findByEventDateId(match.getEventDateId()).orElseThrow(() -> new NoSuchElementException("Event date not found"));
+        if(eventDate.getDate().isAfter(LocalDate.now()))
+            throw new InvalidRequestException("Match has not occurred yet");
         Team teamOne = teamRepository.getTeamByTeamId(match.getTeamOneId());
         Team teamTwo = teamRepository.getTeamByTeamId(match.getTeamTwoId());
 
