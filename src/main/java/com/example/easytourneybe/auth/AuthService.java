@@ -33,6 +33,8 @@ public class AuthService {
         }
 
         User user = (User) authentication.getPrincipal();
+        if (user.getIsDeleted())
+            throw new AuthenticationException("Invalid username or password");
         String accessToken = jwtService.generateToken(user);
         UserDto userDto = UserDto.builder().email(user.getEmail()).role(user.getRole()).firstName(user.getFirstName()).lastName(user.getLastName()).build();
         return AuthResponse.builder().token(accessToken).userInfo(userDto).build();

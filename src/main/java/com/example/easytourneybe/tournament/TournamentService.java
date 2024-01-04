@@ -137,7 +137,7 @@ public class TournamentService {
                 .description(desc)
                 .format(TournamentFormat.ROUND_ROBIN)
                 .status(TournamentStatus.NEED_INFORMATION)
-                .matchDuration(null)
+                .matchDuration(0)
                 .timeBetween(null)
                 .build();
         tournament = tournamentRepository.save(tournament);
