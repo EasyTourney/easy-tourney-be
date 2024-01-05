@@ -1,10 +1,7 @@
 package com.example.easytourneybe.user;
 
 import com.example.easytourneybe.model.ResponseObject;
-import com.example.easytourneybe.user.dto.OrganizerTableDto;
-import com.example.easytourneybe.user.dto.User;
-import com.example.easytourneybe.user.dto.OrganizerUpSertDto;
-import com.example.easytourneybe.user.dto.UserDto;
+import com.example.easytourneybe.user.dto.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,6 +113,20 @@ public class UserController {
                         .data(result)
                         .success(true)
                         .total(result.size())
+                        .build()
+        );
+    }
+
+    @PutMapping("/changePassword")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequestDto request) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.findByEmail(username);
+        OrganizerUpSertDto updatedUser = userService.changePassword(user,request);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .success(true)
+                        .data(updatedUser)
+                        .total(1)
                         .build()
         );
     }

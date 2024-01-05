@@ -158,13 +158,17 @@ public class GenerationService implements IGenerationService {
         );
 
         List<Match> duplicateMatch = matchRepository.findAllDuplicateMatchByTournamentId(tournamentId);
+        Map<String, Object> additionalData = new HashMap<>();
         //if there are a duplicate match, then warning
         if (duplicateMatch.size() > 1) {
-            responseObject.setAdditionalData(java.util.Collections.singletonMap("duplicateMatch", duplicateMatch));
+            additionalData.put("DuplicateMatch", duplicateMatch);
         }
         //if the time of event date is not enough for all matches, then warning
         if(!checkEnoughTime(eventDates).isEmpty()){
-            responseObject.setAdditionalData(java.util.Collections.singletonMap("Time not enough", checkEnoughTime(eventDates)));
+            additionalData.put("TimeNoEnough", checkEnoughTime(eventDates));
+        }
+        if(!additionalData.isEmpty()){
+            responseObject.setAdditionalData(additionalData);
         }
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
     }

@@ -169,4 +169,22 @@ public class UserService implements UserDetailsService {
     public User getUserById(Integer id) {
         return userRepository.findUserById(id).orElseThrow(() -> new InvalidRequestException("User not found"));
     }
+
+    public OrganizerUpSertDto changePassword(User user, ChangePasswordRequestDto request) {
+        if (request.getNewPassword()==null||request.getNewPassword().trim().isEmpty()) {
+            throw new InvalidRequestException("New password must not be empty");
+        }
+        if (!passwordEncoder.matches(request.getOldPassword().trim(), user.getPassword())) {
+            throw new InvalidRequestException("Old password is not correct");
+        }
+        if (request.getNewPassword().trim().equals(request.getOldPassword().trim())) {
+            throw new InvalidRequestException("New password must be different from old password");
+        }
+        if (!request.getNewPassword().trim().equals(request.getConfirmPassword().trim())) {
+            throw new InvalidRequestException("Confirm password must be the same as new password");
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword().trim()));
+        userRepository.save(user);
+        return OrganizerUpSertDto.fromUser(user);
+    }
 }
