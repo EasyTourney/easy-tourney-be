@@ -18,14 +18,14 @@ import static com.example.easytourneybe.constants.DefaultListParams.SIZE;
 @RequestMapping("/category")
 public class CategoryController {
     @Autowired
-    private CategoryService CategoryService;
+    private CategoryService categoryService;
     private static final String DEFAULT_SORT_VALUE = "categoryName";
     public CategoryController(CategoryService CategoryService) {
-        this.CategoryService = CategoryService;
+        this.categoryService = CategoryService;
     }
     @GetMapping("/{id}")
     public ResponseEntity<ResponseObject> findCategoryById(@PathVariable Long id) {
-        Optional<Category> foundCategory = CategoryService.findCategoryById(id);
+        Optional<Category> foundCategory = categoryService.findCategoryById(id);
 
         if (foundCategory.isPresent()) {
             return ResponseEntity.status(HttpStatus.OK).body(
@@ -46,8 +46,8 @@ public class CategoryController {
             @RequestParam(defaultValue = SIZE) int size,
             @RequestParam(defaultValue = DEFAULT_SORT_VALUE) String sortValue)
     {
-        long totalCategories = CategoryService.totalCategory(keyword.trim());
-        List<Category> foundCategories = CategoryService.searchAndSortCategories(keyword.trim(), sortType, page-1, size, sortValue);
+        long totalCategories = categoryService.totalCategory(keyword.trim());
+        List<Category> foundCategories = categoryService.searchAndSortCategories(keyword.trim(), sortType, page-1, size, sortValue);
         ResponseObject responseObject = new ResponseObject(
                     true,
                     foundCategories.size(),
@@ -59,13 +59,13 @@ public class CategoryController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseObject> deleteCategory(@PathVariable Long id) {
-        Optional<Category> updatedCategory = CategoryService.updateCategoryIsDelete(id);
+        Optional<Category> updatedCategory = categoryService.updateCategoryIsDelete(id);
         return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, 1, updatedCategory));
     }
     @PutMapping("/{id}")
     public ResponseEntity<ResponseObject> updateCategory(@PathVariable Long id, @Valid @RequestBody Category category) {
-        Optional<Category> updatedCategory = CategoryService.updateCategory(id, category.getCategoryName().trim());
+        Optional<Category> updatedCategory = categoryService.updateCategory(id, category.getCategoryName().trim());
         return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, 1, updatedCategory)
             );
@@ -74,7 +74,7 @@ public class CategoryController {
     @PostMapping
 
     public ResponseEntity<ResponseObject> createCategory(@Valid @RequestBody Category category) {
-        Category temp = CategoryService.createCategory(category.getCategoryName().trim());
+        Category temp = categoryService.createCategory(category.getCategoryName().trim());
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ResponseObject(true, 1, temp)
         );
@@ -82,9 +82,16 @@ public class CategoryController {
 
     @GetMapping("/all")
     public ResponseEntity<ResponseObject> findAllCategories() {
-        List<Category> foundCategories = CategoryService.findAllCategories();
+        List<Category> foundCategories = categoryService.findAllCategories();
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject(true, foundCategories.size(), foundCategories)
+        );
+    }
+
+    @GetMapping("/countTournament/{id}")
+    public ResponseEntity<?> countTournamentByCategory(@PathVariable("id") Integer categoryId) {
+        return ResponseEntity.ok(
+                ResponseObject.builder().success(true).total(categoryService.countTournamentByCategory(categoryId)).build()
         );
     }
 }

@@ -22,4 +22,8 @@ public class OrganizerTournamentService {
 
         organizerTournamentRepository.saveAll(organizerTournamentList);
     }
+
+    public List<OrganizerTournament> findAllByTournamentId(Integer tournamentId) {
+        return organizerTournamentRepository.findAllByTournamentId(tournamentId);
+    }
 }

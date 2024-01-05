@@ -18,6 +18,8 @@ import com.example.easytourneybe.organizer_tournament.OrganizerTournamentService
 import com.example.easytourneybe.player.PlayerService;
 import com.example.easytourneybe.team.TeamService;
 import com.example.easytourneybe.user.UserService;
+import com.example.easytourneybe.user.dto.User;
+import com.example.easytourneybe.util.AuthenticationUtil;
 import com.example.easytourneybe.util.DateValidatorUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -93,6 +95,17 @@ public class TournamentService {
     @Transactional
     public Optional<Tournament> deleteTournament(Integer id) {
         Optional<Tournament> foundTournament = tournamentRepository.findTournamentByIdAndIsDeletedFalse(id);
+
+        User user = AuthenticationUtil.getCurrentUser(userService);
+        var organizerTournaments = organizerTournamentService.findAllByTournamentId(id);
+        boolean isHasPermission = false;
+        for (OrganizerTournament organizerTournament : organizerTournaments) {
+            if (organizerTournament.getUserId().equals(user.getId()))
+                isHasPermission = true;
+        }
+        if (!isHasPermission)
+            throw new NoSuchElementException("Tournament not found");
+
         if (foundTournament.isPresent()) {
             Tournament tournament = foundTournament.get();
             tournament.setIsDeleted(true);
@@ -155,6 +168,7 @@ public class TournamentService {
         if (events != null) eventDateService.saveAll(events);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         Integer userId = userService.findByEmail(authentication.getName()).getId();
         entityManager.createNativeQuery(INSERT_INTO_TOURNAMENT_ORGANIZER_TABLE)
                 .setParameter("userId", userId)

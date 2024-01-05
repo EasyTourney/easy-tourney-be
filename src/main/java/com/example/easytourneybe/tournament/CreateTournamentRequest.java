@@ -1,6 +1,5 @@
 package com.example.easytourneybe.tournament;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
@@ -16,12 +15,13 @@ import java.util.Set;
 public class CreateTournamentRequest {
 
     @Pattern(regexp = "^[a-zA-Z0-9\\p{L}\\s]*$", message = "Title can not contain special character")
-    @Length(max = 50, min = 2, message = "Tournament title must be between 2 and 50 characters")
+    @Length(max = 30, min = 2, message = "Tournament title must be between 2 and 30 characters")
     private String title;
     @NotNull(message = "category id must not be null.")
     private Integer categoryId;
     @NotNull(message = "EventDate must not be null.")
     private Set<LocalDate> eventDates;
+    @Length(max = 100, message = "Tournament description must be less than 100 characters")
     private String description;
 
     public void setTitle(String title) {

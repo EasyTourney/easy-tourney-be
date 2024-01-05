@@ -146,4 +146,9 @@ public class CategoryServiceImpl implements com.example.easytourneybe.category.i
             throw new NoSuchElementException("Category not found");
         }
     }
+
+    @Override
+    public Integer countTournamentByCategory(Integer categoryId) {
+        return tournamentService.findTournamentByCategoryId(categoryId).stream().filter(tournament -> !tournament.getIsDeleted()).toList().size();
+    }
 }

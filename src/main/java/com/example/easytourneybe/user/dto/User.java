@@ -1,7 +1,6 @@
 package com.example.easytourneybe.user.dto;
 
 import com.example.easytourneybe.enums.UserRole;
-import com.example.easytourneybe.tournament.Tournament;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -73,6 +72,11 @@ public class User implements UserDetails {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         isDeleted = false;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 
     @Override

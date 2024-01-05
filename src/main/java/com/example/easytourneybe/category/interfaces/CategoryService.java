@@ -27,4 +27,6 @@ public interface CategoryService {
     List<Category> findAllCategories();
 
     CategoryDto findCategoryDtoById(Integer categoryId);
+
+    Integer countTournamentByCategory(Integer categoryId);
 }
