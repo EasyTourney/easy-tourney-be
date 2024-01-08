@@ -416,10 +416,11 @@ public class MatchService implements IMatchService {
             if (isAddToTheEnd) {
                 if (matchesInDate.isEmpty())
                     newStartTime = eventDateService.findByEventDateId(newEventDateId).get().getStartTime();
-                else
+                else {
                     newStartTime = matchesInDate.get(matchesInDate.size() - 1).getEndTime().plusMinutes(betweenTime);
-                if (newStartTime.isBefore(matchesInDate.get(matchesInDate.size() - 1).getEndTime()))
-                    throw new InvalidRequestException("Not enough time to schedule");
+                    if (newStartTime.isBefore(matchesInDate.get(matchesInDate.size() - 1).getEndTime()))
+                        throw new InvalidRequestException("Not enough time to schedule");
+                }
                 if (newStartTime.plusMinutes(duration).compareTo(newStartTime) <= 0)
                     throw new InvalidRequestException("Not enough time to schedule");
             }
