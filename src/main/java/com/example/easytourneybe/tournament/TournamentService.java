@@ -103,7 +103,7 @@ public class TournamentService {
             if (organizerTournament.getUserId().equals(user.getId()))
                 isHasPermission = true;
         }
-        if (!isHasPermission)
+        if (!isHasPermission && !user.getRole().equals(UserRole.ADMIN))
             throw new NoSuchElementException("Tournament not found");
 
         if (foundTournament.isPresent()) {

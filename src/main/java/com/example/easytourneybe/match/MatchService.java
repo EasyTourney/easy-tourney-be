@@ -94,8 +94,9 @@ public class MatchService implements IMatchService {
 
     @Override
     public Map<EventDate, List<List<LocalTime>>> timeSheetMatches(Integer duration, Integer betweenTime, Integer numMatch, List<EventDate> eventDates) {
-        if (numMatch < eventDates.size())
-            throw new InvalidRequestException("The current number of matches is less than number of event dates");
+        if (numMatch < eventDates.size()) {
+            eventDates = eventDates.stream().sorted(Comparator.comparing(EventDate::getDate)).limit(numMatch).collect(Collectors.toList());
+        }
         int numEvent = eventDates.size();
 
         //Calculate the average number of matches occurring per event date.
