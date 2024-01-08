@@ -43,8 +43,8 @@ public class EventServiceImpl implements EventService {
         EventDate evtDate = eventDateOpt.get();
         if (evtDate.getDate().isBefore(LocalDate.now()))
             throw new InvalidRequestException("Can not add new Event into Event Date in the past: " + evtDate.getDate());
-        if (evtDate.getDate().isEqual(LocalDate.now()) && evtDate.getStartTime().isBefore(LocalTime.now()))
-            throw new InvalidRequestException("Can not add new Event into Event Date has already start");
+        if (evtDate.getDate().isEqual(LocalDate.now()))
+            throw new InvalidRequestException("Can not add new Event into Event Date has already started");
 
         if (!evtDate.getTournamentId().equals(tournamentId))
             throw new InvalidRequestException("Can not create Event in another Tournament");
@@ -55,6 +55,8 @@ public class EventServiceImpl implements EventService {
             for (Match match : matches) {
                 if (match.getEndTime().isAfter(startTime))
                     startTime = match.getEndTime().plusMinutes(timeBetween);
+                if (startTime.isBefore(match.getEndTime()))
+                    throw new InvalidRequestException("Not enough time to schedule");
             }
         }
 
@@ -139,6 +141,8 @@ public class EventServiceImpl implements EventService {
         event.setTitle(eventDto.getTitle());
         event.setMatchDuration(duration);
         event.setEndTime(event.getStartTime().plusMinutes(duration));
+        if (event.getEndTime().isBefore(event.getStartTime()))
+            throw new InvalidRequestException("Not enough time to schedule");
         final int increaseTime = duration - oldDuration;
         matchRepository.save(event);
 
