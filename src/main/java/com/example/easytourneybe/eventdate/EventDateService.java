@@ -69,7 +69,7 @@ public class EventDateService {
             throw new InvalidRequestException("Start time and end time are the same");
         }
 
-        if(eventDate.getDate().equals(LocalDate.now()) && startTimeValid.isBefore(LocalTime.now())){
+        if(eventDate.getDate().equals(LocalDate.now()) && startTimeValid.isBefore(LocalTime.now())&&eventDate.getStartTime()!=startTimeValid){
             throw new InvalidRequestException("Start time must be after current time");
         }
         List< Match > matches = matchRepository.getAllByEventDateIdOrOrderByStartTime(eventDateId);
