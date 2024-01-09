@@ -45,7 +45,9 @@ public class WebSecurityConfig {
                                 .requestMatchers(WHITE_LIST_URL).permitAll()
                                 .requestMatchers(SWAGGER_LIST_URL).permitAll()
                                 .requestMatchers(HttpMethod.PUT,EXCLUDE_FROM_ADMIN).permitAll()
-                                .requestMatchers(ONLY_ADMIN_LIST_URL).hasAuthority(UserRole.ADMIN.name())
+                                .requestMatchers(HttpMethod.POST,ONLY_ADMIN_LIST_URL).hasAuthority(UserRole.ADMIN.name())
+                                .requestMatchers(HttpMethod.PUT, ONLY_ADMIN_LIST_URL).hasAuthority(UserRole.ADMIN.name())
+                                .requestMatchers(HttpMethod.DELETE, ONLY_ADMIN_LIST_URL).hasAuthority(UserRole.ADMIN.name())
                                 .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider);
