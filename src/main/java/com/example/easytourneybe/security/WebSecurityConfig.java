@@ -31,7 +31,8 @@ public class WebSecurityConfig {
     private final AuthenticationProvider authenticationProvider;
     private static final String[] WHITE_LIST_URL = {"/auth/**"};
     private static final String[] SWAGGER_LIST_URL = {"/swagger-ui/**", "/*/swagger-resources/**", "/v2/api-docs","/webjars/**",  "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**"};
-    private static final String[] ONLY_ADMIN_LIST_URL = {"/category/**", "/organizer/**"};
+    private static final String[] ONLY_ADMIN_LIST_URL = {"/category/**","/organizer/**"};
+    private static final String[] EXCLUDE_FROM_ADMIN = {"/organizer/changePassword"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -43,9 +44,8 @@ public class WebSecurityConfig {
                         request
                                 .requestMatchers(WHITE_LIST_URL).permitAll()
                                 .requestMatchers(SWAGGER_LIST_URL).permitAll()
-                                .requestMatchers(HttpMethod.POST, ONLY_ADMIN_LIST_URL).hasAuthority(UserRole.ADMIN.name())
-                                .requestMatchers(HttpMethod.PUT, ONLY_ADMIN_LIST_URL).hasAuthority(UserRole.ADMIN.name())
-                                .requestMatchers(HttpMethod.DELETE, ONLY_ADMIN_LIST_URL).hasAuthority(UserRole.ADMIN.name())
+                                .requestMatchers(HttpMethod.PUT,EXCLUDE_FROM_ADMIN).permitAll()
+                                .requestMatchers(ONLY_ADMIN_LIST_URL).hasAuthority(UserRole.ADMIN.name())
                                 .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider);
