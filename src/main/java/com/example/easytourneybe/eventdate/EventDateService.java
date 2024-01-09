@@ -4,8 +4,10 @@ import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.eventdate.dto.EventDateAdditionalDto;
 import com.example.easytourneybe.exceptions.InvalidRequestException;
 import com.example.easytourneybe.match.Match;
+import com.example.easytourneybe.match.MatchService;
 import com.example.easytourneybe.match.interfaces.IMatchRepository;
 import com.example.easytourneybe.model.ResponseObject;
+import com.example.easytourneybe.tournament.Tournament;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +33,7 @@ public class EventDateService {
     IMatchRepository matchRepository;
     public List<EventDate> findAllByTournamentId(Integer tournamentId) {
         return eventDateRepository.findAllByTournamentId(tournamentId);
-    };
+    }
 
     public void saveAll(List<EventDate> eventDates) {
          eventDateRepository.saveAll(eventDates);
@@ -54,7 +56,10 @@ public class EventDateService {
         String warningMessage = "";
         EventDate eventDate = eventDateRepository.findById(eventDateId).orElseThrow(
                 () -> new NoSuchElementException("EventDate with id " + eventDateId + " does not exist"));
-
+        //check if tournament is finished
+        Tournament tournament= eventDateRepository.findTournamentByIdAndIsDeletedFalse(tournamentId).orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+        if(Objects.equals(tournament.getStatus().toString(), "FINISHED")||Objects.equals(tournament.getStatus().toString(), "DISCARDED"))
+            throw new InvalidRequestException("This tournament is finished or discarded");
         LocalTime startTimeValid = ParseStringToTime(startTime,"Start time must be valid");
         LocalTime endTimeValid = ParseStringToTime(endTime,"End time must be valid");
 

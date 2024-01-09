@@ -542,8 +542,11 @@ public class MatchService implements IMatchService {
 
     public ResponseEntity<ResponseObject> updateMatchDetails(Integer tournamentId, Integer matchID, Long teamOneId, Long teamTwoId, Integer matchDuration) {
         checkMatchInTournament(tournamentId, matchID);
+        isFinishedTournament(tournamentId);
         Match match = matchRepository.findById(matchID).orElseThrow(() -> new NoSuchElementException("Match not found"));
         EventDate eventDate= eventDateService.findByEventDateId(match.getEventDateId()).orElseThrow(() -> new NoSuchElementException("Event date not found"));
+        if( eventDate.getDate().isBefore(LocalDate.now())||(match.getStartTime().isBefore(LocalTime.now())&& eventDate.getDate().equals(LocalDate.now())))
+            throw new InvalidRequestException("This match is finished");
         String warningMessage = "";
         if(matchDuration<=0){
             throw new InvalidRequestException("Match duration must be greater than 0");
@@ -625,5 +628,10 @@ public class MatchService implements IMatchService {
     @Override
     public void deleteAllByTournamentId(Integer id) {
         matchRepository.deleteAllByTournamentId(id);
+    }
+    public void isFinishedTournament(Integer tournamentId){
+        Tournament tournament= tournamentRepository.findTournamentByIdAndIsDeletedFalse(tournamentId).orElseThrow(() -> new NoSuchElementException("Tournament not found"));
+        if(Objects.equals(tournament.getStatus().toString(), "FINISHED")||Objects.equals(tournament.getStatus().toString(), "DISCARDED"))
+            throw new InvalidRequestException("This tournament is finished or discarded");
     }
 }

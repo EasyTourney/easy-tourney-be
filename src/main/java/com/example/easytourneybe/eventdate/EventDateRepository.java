@@ -2,10 +2,12 @@ package com.example.easytourneybe.eventdate;
 
 import com.example.easytourneybe.eventdate.dto.EventDate;
 import com.example.easytourneybe.eventdate.dto.EventDateAdditionalDto;
+import com.example.easytourneybe.tournament.Tournament;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -40,4 +42,7 @@ public interface EventDateRepository extends JpaRepository<EventDate, Integer> {
             GROUP BY e.id
             """)
     List<EventDateAdditionalDto> findAllEventDatesAndCountMatch(Integer tournamentId);
+    @Query("SELECT c FROM tournament c WHERE c.id = :id AND c.isDeleted = false")
+    Optional<Tournament> findTournamentByIdAndIsDeletedFalse(@Param("id") Integer id);
+
 }
