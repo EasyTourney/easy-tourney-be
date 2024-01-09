@@ -17,7 +17,7 @@ import java.time.LocalTime;
 @Entity
 @Builder
 @Table(name = "event_date")
-public class EventDate {
+public class EventDate implements Cloneable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -51,4 +51,16 @@ public class EventDate {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+   @Override
+    public EventDate clone(){
+       try {
+           // Call the clone method of Object class
+           return (EventDate) super.clone();
+       } catch (CloneNotSupportedException e) {
+           // Handle the exception as needed
+           return null;
+       }
+   }
+
 }

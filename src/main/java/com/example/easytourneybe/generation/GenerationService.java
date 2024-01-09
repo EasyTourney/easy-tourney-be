@@ -41,8 +41,9 @@ public class GenerationService implements IGenerationService {
     private TournamentRepository tournamentRepository;
     @Autowired
     private IMatchRepository matchRepository;
+
     @Override
-    public List<GenerationDto> generate(Integer tournamentId, Integer duration, Integer betweenTime, LocalTime startTime, LocalTime endTime) {
+    public ResponseEntity<ResponseObject> generate(Integer tournamentId, Integer duration, Integer betweenTime, LocalTime startTime, LocalTime endTime) {
         List<List<Team>> matches = matchService.matchList(tournamentId);
         List<EventDate> eventDates = eventDateService.findAllByTournamentId(tournamentId);
         Optional<Tournament> tournament = tournamentService.findById(tournamentId);
@@ -77,18 +78,40 @@ public class GenerationService implements IGenerationService {
         eventDateService.saveAll(eventDates);
 
         List<GenerationDto> generations = new ArrayList<>();
+        List<MatchDto> matchList;
+        String warningMessage = "";
 
         Map<EventDate, List<List<LocalTime>>> timeSheetMatches = matchService.timeSheetMatches(duration, betweenTime, matches.size(), eventDates);
         if (!matchUtils.compareNumMatchAndNumMatchTime(matches.size(), matchUtils.numberMatchTimes(timeSheetMatches))) {
-            throw new InvalidRequestException("The tournament schedule does not accommodate the current number of matches.");
-        } else {
-            List<MatchDto> matchList = matchService.mappingMatchAndTime(matches, timeSheetMatches,duration);
-            eventDates.sort(Comparator.comparing(EventDate::getDate));
-            for (EventDate eventDate : eventDates) {
-                generations.add(matchUtils.createGeneration(Optional.ofNullable(eventDate), matchList));
+            LocalTime newEndTime = LocalTime.of(23, 59, 59);
+            List<EventDate> newEventDates = new ArrayList<>();
+            eventDates.forEach(eventDate -> newEventDates.add(eventDate.clone()));
+            newEventDates.forEach(eventDate -> {
+                eventDate.setEndTime(newEndTime);
+            });
+            timeSheetMatches = matchService.timeSheetMatches(duration, betweenTime, matches.size(), newEventDates);
+            if (!matchUtils.compareNumMatchAndNumMatchTime(matches.size(), matchUtils.numberMatchTimes(timeSheetMatches))){
+                throw new InvalidRequestException("Time of event date is not enough for all matches");
             }
-            return generations;
+                matchList = matchService.mappingMatchAndTime(matches, timeSheetMatches, duration);
+            warningMessage = "The total duration of matches exceeds the time frame within the event_date. " +
+                    "Recommendation: Extend the time within the event_date to accommodate the match duration.";
+        } else {
+            matchList = matchService.mappingMatchAndTime(matches, timeSheetMatches, duration);
         }
+
+        eventDates.sort(Comparator.comparing(EventDate::getDate));
+        for (EventDate eventDate : eventDates) {
+            generations.add(matchUtils.createGeneration(Optional.ofNullable(eventDate), matchList));
+        }
+
+        ResponseObject responseObject = new ResponseObject(true, generations.size(), generations);
+
+        if (!warningMessage.isEmpty()) {
+            responseObject.setAdditionalData(java.util.Collections.singletonMap("warningMessage", warningMessage));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+
     }
 
     @Override
@@ -164,10 +187,10 @@ public class GenerationService implements IGenerationService {
             additionalData.put("DuplicateMatch", duplicateMatch);
         }
         //if the time of event date is not enough for all matches, then warning
-        if(!checkEnoughTime(eventDates).isEmpty()){
+        if (!checkEnoughTime(eventDates).isEmpty()) {
             additionalData.put("TimeNoEnough", checkEnoughTime(eventDates));
         }
-        if(!additionalData.isEmpty()){
+        if (!additionalData.isEmpty()) {
             responseObject.setAdditionalData(additionalData);
         }
         return ResponseEntity.status(HttpStatus.OK).body(responseObject);
@@ -257,6 +280,7 @@ public class GenerationService implements IGenerationService {
         }
         return matchList;
     }
+
     private Map<String, Object> checkEnoughTime(List<EventDate> eventDates) {
         String warningMessage = "";
         List<Integer> eventDateId = new ArrayList<>();
@@ -272,7 +296,7 @@ public class GenerationService implements IGenerationService {
                 }
             }
         }
-        if(warningMessage.isEmpty()){
+        if (warningMessage.isEmpty()) {
             return Collections.emptyMap();
         }
         Map<String, Object> result = new HashMap<>();

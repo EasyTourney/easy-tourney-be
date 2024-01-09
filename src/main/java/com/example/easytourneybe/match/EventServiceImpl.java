@@ -43,8 +43,6 @@ public class EventServiceImpl implements EventService {
         EventDate evtDate = eventDateOpt.get();
         if (evtDate.getDate().isBefore(LocalDate.now()))
             throw new InvalidRequestException("Can not add new Event into Event Date in the past: " + evtDate.getDate());
-        if (evtDate.getDate().isEqual(LocalDate.now()))
-            throw new InvalidRequestException("Can not add new Event into Event Date has already started");
 
         if (!evtDate.getTournamentId().equals(tournamentId))
             throw new InvalidRequestException("Can not create Event in another Tournament");

@@ -28,9 +28,7 @@ public class GenerationController {
                                       @RequestBody(required = false) GenerationRequest request) {
 
         if( request.isTimeRangeValid()) {
-            List<GenerationDto> generations = generationService.generate(tournamentId, request.getDuration(), request.getBetweenTime(), request.getStartTime(), request.getEndTime());
-            ResponseObject responseObject = new ResponseObject(true, generations.size(), generations);
-            return ResponseEntity.status(HttpStatus.OK).body(responseObject);
+            return generationService.generate(tournamentId, request.getDuration(), request.getBetweenTime(), request.getStartTime(), request.getEndTime());
         }
         else {
             throw new InvalidRequestException("Start time or end time invalid");

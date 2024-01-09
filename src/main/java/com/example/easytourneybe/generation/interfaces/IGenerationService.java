@@ -11,7 +11,7 @@ import java.util.List;
 public interface IGenerationService {
 
     @Transactional
-    List<GenerationDto> generate(Integer tournamentId, Integer duration, Integer betweenTime, LocalTime startTime,LocalTime endTime);
+    ResponseEntity<ResponseObject> generate(Integer tournamentId, Integer duration, Integer betweenTime, LocalTime startTime,LocalTime endTime);
 
     @Transactional
     List<GenerationDto> updateGeneration(Long matchId, Integer eventDateId,Long newPositionMatchId);
