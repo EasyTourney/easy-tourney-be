@@ -30,3 +30,25 @@ END IF;
 
 CREATE CAST (character varying AS user_role) WITH INOUT AS IMPLICIT;
 END $$;
+
+
+INSERT INTO users (
+    email,
+    password,
+    first_name,
+    last_name,
+    phone_number,
+    role,
+    is_deleted,
+    created_at
+) VALUES (
+             'admin@gmail.com',
+             '$2a$12$ozV4jBb8nKKD4uKdCbixDO.CoKKFqgX6pYYpgCPUcHUqZNxyVTZ8K',
+             'Admin',
+             'User',
+             '0123456789',
+             'ADMIN'::user_role,
+             FALSE,
+             NOW()
+         )
+ON CONFLICT (email) DO NOTHING;
