@@ -24,7 +24,7 @@ This repository contains the backend service for **EasyTourney**, a platform des
 
 - Java Development Kit (JDK) 17 or higher
 - Gradle
-- PostgreSQL database
+- PostgreSQL database (Create database: EasyTourney and Flyway will automatically create table)
 
 ### Installation
 
